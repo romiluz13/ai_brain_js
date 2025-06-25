@@ -51,14 +51,14 @@ export class AgentCollection extends BaseCollection<Agent> {
   /**
    * Create a new agent
    */
-  async createAgent(agentData: Omit<Agent, '_id' | 'createdAt' | 'updatedAt'>): Promise<Agent> {
+  async createAgent(agentData: Omit<Agent, 'createdAt' | 'updatedAt'>): Promise<Agent> {
     const now = new Date();
     const agent: Agent = {
       ...agentData,
       _id: new ObjectId(),
       createdAt: now,
       updatedAt: now,
-      status: agentData.status || 'inactive',
+      status: agentData.status || AgentStatus.INACTIVE,
       lastActiveAt: agentData.lastActiveAt || now,
       metadata: agentData.metadata || {}
     };
@@ -106,8 +106,8 @@ export class AgentCollection extends BaseCollection<Agent> {
 
     const result = await this.collection.findOneAndUpdate(
       { _id: objectId },
-      { $set: updateDoc },
-      { returnDocument: 'after' }
+      { $set: updateDoc as any },
+      { returnDocument: 'after', includeResultMetadata: true } as const
     );
 
     return result.value;
@@ -147,7 +147,7 @@ export class AgentCollection extends BaseCollection<Agent> {
         $set: { 
           lastActiveAt: now,
           updatedAt: now,
-          status: 'active'
+          status: AgentStatus.ACTIVE
         }
       }
     );
@@ -203,7 +203,7 @@ export class AgentCollection extends BaseCollection<Agent> {
    * Get active agents
    */
   async getActiveAgents(): Promise<Agent[]> {
-    return await this.collection.find({ status: 'active' }).toArray();
+    return await this.collection.find({ status: AgentStatus.ACTIVE }).toArray();
   }
 
   /**
@@ -284,7 +284,7 @@ export class AgentCollection extends BaseCollection<Agent> {
     const cutoffDate = new Date(Date.now() - inactiveDays * 24 * 60 * 60 * 1000);
     
     const result = await this.collection.deleteMany({
-      status: 'inactive',
+      status: AgentStatus.INACTIVE,
       lastActiveAt: { $lt: cutoffDate }
     });
 

@@ -33,7 +33,7 @@ export interface PerformanceMetrics {
     p99: number;
     min: number;
     max: number;
-    trend: 'improving' | 'stable' | 'degrading';
+    trend: 'stable' | 'increasing' | 'decreasing';
   };
   tokenUsage: {
     totalTokens: number;
@@ -542,19 +542,19 @@ export class PerformanceAnalyticsEngine {
     this.alertThresholds.set('throughput_low', { metric: 'throughput.operationsPerSecond', threshold: 1, operator: 'lt' });
   }
 
-  private calculateTrend(values: number[]): 'improving' | 'stable' | 'degrading' {
+  private calculateTrend(values: number[]): 'stable' | 'increasing' | 'decreasing' {
     if (values.length < 2) return 'stable';
-    
+
     const firstHalf = values.slice(0, Math.floor(values.length / 2));
     const secondHalf = values.slice(Math.floor(values.length / 2));
-    
+
     const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
     const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-    
+
     const changePercent = ((secondAvg - firstAvg) / firstAvg) * 100;
-    
-    if (changePercent > 10) return 'degrading'; // Higher response time/cost is worse
-    if (changePercent < -10) return 'improving';
+
+    if (changePercent > 10) return 'increasing'; // Higher response time/cost is worse
+    if (changePercent < -10) return 'decreasing';
     return 'stable';
   }
 

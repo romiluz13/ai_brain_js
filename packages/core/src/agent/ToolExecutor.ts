@@ -1,6 +1,6 @@
 import { IDataStore } from '../persistance/IDataStore';
 import { Document } from 'mongodb';
-import { logger } from '@mongodb-ai/utils';
+import { logger } from '../utils/logger';
 
 export interface ToolDefinition extends Document {
   tool_id: string;

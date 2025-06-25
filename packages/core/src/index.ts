@@ -19,7 +19,7 @@ export { MongoVectorStore } from './vector/MongoVectorStore';
 export { OpenAIEmbeddingProvider } from './embeddings/OpenAIEmbeddingProvider';
 export { VoyageAIEmbeddingProvider } from './embeddings/VoyageAIEmbeddingProvider';
 
-// Core types and interfaces
+// Core types and interfaces (excluding conflicting names)
 export * from './types';
 
 // MongoDB persistence layer (enhanced with Vector Search)
@@ -96,4 +96,4 @@ export { FrameworkOptimizationEngine as AdaptationEngine } from './self-improvem
 // Legacy exports (keeping for backward compatibility)
 export * from './agent';
 export * from './features';
-export * from './real-time';
+// Note: real-time exports removed to avoid conflicts with tracing module

@@ -69,7 +69,7 @@ export type {
   AgentStep,
   AgentError,
   PerformanceMetrics,
-  ContextItem,
+  // ContextItem, // Removed duplicate - already exported from ContextCollection
   TokenUsage,
   CostBreakdown,
   FrameworkMetadata

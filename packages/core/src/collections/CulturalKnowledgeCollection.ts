@@ -197,9 +197,17 @@ export interface CulturalFilter {
   country?: string;
   language?: string;
   formality?: string;
+  'culture.name'?: string;
   'culture.metadata.formality'?: string;
   'culture.metadata.directness'?: string;
   'adaptation.adaptation_level'?: { $gte?: number; $lte?: number };
+}
+
+export interface CulturalAnalyticsOptions {
+  includeTemporalTrends?: boolean;
+  includeCrossReferences?: boolean;
+  includeRecommendations?: boolean;
+  timeRange?: { start: Date; end: Date };
 }
 
 /**

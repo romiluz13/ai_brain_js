@@ -267,7 +267,7 @@ export interface ProtocolFilter {
   'protocol.priority'?: string;
   'participants.sender.agentId'?: string;
   'routing.delivery.status'?: string;
-  'negotiation.process.status'?: string;
+  'negotiation.process.status'?: string | { $in?: string[] };
   timestamp?: { $gte?: Date; $lte?: Date };
 }
 
@@ -528,7 +528,7 @@ export class CommunicationProtocolCollection extends BaseCollection<Communicatio
     compatibleWith: string[];
     deprecationStatus: string;
   }>> {
-    return await this.collection.aggregate([
+    const results = await this.collection.aggregate([
       {
         $group: {
           _id: '$protocol.id',
@@ -554,6 +554,8 @@ export class CommunicationProtocolCollection extends BaseCollection<Communicatio
         }
       }
     ]).toArray();
+
+    return results as Array<{ protocolId: string; version: string; compatibleWith: string[]; deprecationStatus: string }>;
   }
 
   private generatePerformanceRecommendations(stats: any, failures: string[]): string[] {

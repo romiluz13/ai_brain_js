@@ -279,12 +279,10 @@ export class SkillCapabilityManager {
           practiceFrequency: 'weekly',
           feedbackPreference: 'immediate'
         },
-        analytics: {
-          learningRate: this.calculateLearningRate(proficiency.overall),
-          retentionRate: 0.8, // Default, will be updated over time
-          difficultyPreference: request.context.complexity,
-          motivationFactors: this.identifyMotivationFactors(request.context.outcome),
-          learningPatterns: this.identifyLearningPatterns(request.performance)
+        resources: {
+          completed: [],
+          recommended: [],
+          inProgress: []
         }
       },
       application: {
@@ -304,18 +302,58 @@ export class SkillCapabilityManager {
           commonChallenges: this.identifyCommonChallenges(request.performance),
           successFactors: this.identifySuccessFactors(request.performance, request.environment)
         },
-        effectiveness: {
-          taskSuccessRate: request.context.outcome === 'successful' ? 1.0 : 0.5,
-          qualityConsistency: proficiency.overall,
-          adaptabilityScore: this.calculateAdaptabilityScore(request.environment),
-          innovationIndex: proficiency.creative || 0.5,
-          collaborationEffectiveness: proficiency.collaborative || 0.5
+        performance: {
+          averageQuality: proficiency.overall,
+          consistencyScore: proficiency.overall,
+          improvementRate: 0.1,
+          errorRate: request.context.outcome === 'successful' ? 0.1 : 0.3,
+          speedMetrics: {
+            averageTime: request.context.duration,
+            bestTime: request.context.duration * 0.8,
+            timeImprovement: 0.1
+          }
         }
       },
       matching: {
         synergies: [],
         gaps: [],
-        recommendations: this.generateInitialRecommendations(request, proficiency)
+        roleMatching: []
+      },
+      metadata: {
+        framework: 'skill_assessment',
+        version: '1.0.0',
+        dataSource: 'assessment' as const,
+        reliability: proficiency.overall,
+        lastUpdated: new Date(),
+        updateFrequency: 'real_time' as const,
+        quality: {
+          completeness: proficiency.overall,
+          consistency: proficiency.overall,
+          accuracy: proficiency.overall,
+          freshness: 1.0
+        }
+      },
+      analytics: {
+        trends: {
+          proficiencyTrend: 0.1,
+          usageTrend: 0.1,
+          qualityTrend: 0.1,
+          learningVelocity: this.calculateLearningRate(proficiency.overall)
+        },
+        benchmarks: {
+          peerComparison: 0.5,
+          industryStandard: 0.6,
+          roleRequirement: 0.7,
+          personalGoals: 0.8
+        },
+        predictions: {
+          futureRelevance: 0.8,
+          marketValue: 0.7,
+          developmentPotential: proficiency.overall + 0.1,
+          timeToMastery: 30
+        },
+        insights: [`Initial assessment shows ${proficiency.overall > 0.7 ? 'strong' : 'developing'} proficiency`],
+        recommendations: [`Focus on ${request.context.taskType} practice`]
       }
     };
 

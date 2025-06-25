@@ -404,7 +404,7 @@ export class ConfidenceTrackingCollection extends BaseCollection<ConfidenceRecor
         (result.overconfidentCount / result.verifiedPredictions) : 0,
       underconfidenceRate: result.verifiedPredictions > 0 ? 
         (result.underconfidentCount / result.verifiedPredictions) : 0,
-      confidenceByDomain: domainStats
+      confidenceByDomain: domainStats as Array<{ domain: string; avgConfidence: number; accuracy: number }>
     };
   }
 
@@ -558,8 +558,8 @@ export class ConfidenceTrackingCollection extends BaseCollection<ConfidenceRecor
     const mce = calibrationErrors.length > 0 ? Math.max(...calibrationErrors) : 0;
 
     return {
-      calibrationCurve,
-      reliabilityDiagram,
+      calibrationCurve: calibrationCurve as Array<{ confidenceBin: number; accuracy: number; count: number }>,
+      reliabilityDiagram: reliabilityDiagram as Array<{ predicted: number; observed: number; count: number }>,
       brierScore: metrics.brierScore || 0,
       logLoss: metrics.logLoss || 0,
       ece,
@@ -640,7 +640,7 @@ export class ConfidenceTrackingCollection extends BaseCollection<ConfidenceRecor
         }
       },
       { $sort: { timestamp: 1 } }
-    ]).toArray();
+    ]).toArray() as Array<{ timestamp: Date; avgConfidence: number; accuracy: number; predictionCount: number; calibrationError: number }>;
   }
 
   /**

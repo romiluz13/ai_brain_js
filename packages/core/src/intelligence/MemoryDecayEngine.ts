@@ -366,7 +366,7 @@ export class MemoryDecayEngine {
             }],
             $slice: -10 // Keep last 10 entries
           }
-        }
+        } as any
       }
     );
 

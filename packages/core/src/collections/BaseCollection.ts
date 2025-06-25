@@ -5,7 +5,7 @@
  * including validation, error handling, and basic CRUD operations.
  */
 
-import { Collection, Db, ObjectId } from 'mongodb';
+import { Collection, Db, ObjectId, OptionalUnlessRequiredId, WithId } from 'mongodb';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
@@ -120,7 +120,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
     const hasMore = page < totalPages;
 
     return {
-      documents,
+      documents: documents.map(doc => doc as unknown as T),
       total,
       hasMore,
       page,
@@ -129,16 +129,33 @@ export abstract class BaseCollection<T extends BaseDocument> {
   }
 
   /**
+   * Find many documents (alias for compatibility)
+   */
+  async findMany(
+    filter: any = {},
+    options: {
+      limit?: number;
+      sort?: any;
+    } = {}
+  ): Promise<WithId<T>[]> {
+    return await this.collection
+      .find(filter)
+      .sort(options.sort || { createdAt: -1 })
+      .limit(options.limit || 50)
+      .toArray();
+  }
+
+  /**
    * Generic find one
    */
-  async findOne(filter: any): Promise<T | null> {
+  async findOne(filter: any): Promise<WithId<T> | null> {
     return await this.collection.findOne(filter);
   }
 
   /**
    * Generic find by ID
    */
-  async findById(id: string | ObjectId): Promise<T | null> {
+  async findById(id: string | ObjectId): Promise<WithId<T> | null> {
     const objectId = typeof id === 'string' ? new ObjectId(id) : id;
     return await this.collection.findOne({ _id: objectId } as any);
   }
@@ -146,7 +163,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
   /**
    * Generic insert one
    */
-  async insertOne(document: Omit<T, '_id'>): Promise<T> {
+  async insertOne(document: OptionalUnlessRequiredId<T>): Promise<T> {
     const now = new Date();
     const docWithTimestamps = {
       ...document,
@@ -157,7 +174,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
 
     await this.validateDocument(docWithTimestamps);
     
-    const result = await this.collection.insertOne(docWithTimestamps);
+    const result = await this.collection.insertOne(docWithTimestamps as any);
     
     if (!result.acknowledged) {
       throw new Error(`Failed to insert document into ${this.collectionName}`);
@@ -169,7 +186,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
   /**
    * Generic insert many
    */
-  async insertMany(documents: Omit<T, '_id'>[]): Promise<T[]> {
+  async insertMany(documents: OptionalUnlessRequiredId<T>[]): Promise<T[]> {
     const now = new Date();
     const docsWithTimestamps = documents.map(doc => ({
       ...doc,
@@ -183,7 +200,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
       await this.validateDocument(doc);
     }
 
-    const result = await this.collection.insertMany(docsWithTimestamps);
+    const result = await this.collection.insertMany(docsWithTimestamps as any);
     
     if (!result.acknowledged) {
       throw new Error(`Failed to insert documents into ${this.collectionName}`);
@@ -199,7 +216,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
     filter: any,
     update: any,
     options: { upsert?: boolean } = {}
-  ): Promise<T | null> {
+  ): Promise<WithId<T> | null> {
     const updateDoc = {
       ...update,
       $set: {
@@ -211,13 +228,14 @@ export abstract class BaseCollection<T extends BaseDocument> {
     const result = await this.collection.findOneAndUpdate(
       filter,
       updateDoc,
-      { 
+      {
         returnDocument: 'after',
+        includeResultMetadata: false,
         ...options
       }
     );
 
-    return result.value;
+    return result;
   }
 
   /**
@@ -227,7 +245,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
     id: string | ObjectId,
     update: any,
     options: { upsert?: boolean } = {}
-  ): Promise<T | null> {
+  ): Promise<WithId<T> | null> {
     const objectId = typeof id === 'string' ? new ObjectId(id) : id;
     return await this.updateOne({ _id: objectId }, update, options);
   }
@@ -279,10 +297,11 @@ export abstract class BaseCollection<T extends BaseDocument> {
   }
 
   /**
-   * Aggregate pipeline
+   * Aggregate pipeline with proper typing
    */
-  async aggregate(pipeline: any[]): Promise<any[]> {
-    return await this.collection.aggregate(pipeline).toArray();
+  async aggregate<R = any>(pipeline: any[]): Promise<R[]> {
+    const results = await this.collection.aggregate(pipeline).toArray();
+    return results as R[];
   }
 
   /**
@@ -305,7 +324,7 @@ export abstract class BaseCollection<T extends BaseDocument> {
       skip?: number;
       filter?: any;
     } = {}
-  ): Promise<T[]> {
+  ): Promise<WithId<T>[]> {
     const { limit = 20, skip = 0, filter = {} } = options;
     
     const searchFilter = {
@@ -313,12 +332,14 @@ export abstract class BaseCollection<T extends BaseDocument> {
       ...filter
     };
 
-    return await this.collection
+    const documents = await this.collection
       .find(searchFilter)
       .sort({ score: { $meta: 'textScore' } })
       .skip(skip)
       .limit(limit)
       .toArray();
+
+    return documents;
   }
 
   /**

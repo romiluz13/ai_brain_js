@@ -32,12 +32,26 @@ export {
   AgentTrace,
   AgentStep,
   AgentError,
-  PerformanceMetrics,
   ContextItem,
   TokenUsage,
   CostBreakdown,
   FrameworkMetadata
 } from '../collections/TracingCollection';
+
+// Import types for internal use (to avoid conflicts with RealTimeMonitor exports)
+import type {
+  PerformanceMetrics as TracingPerformanceMetrics,
+  AgentError,
+  ContextItem,
+  TokenUsage,
+  CostBreakdown,
+  FrameworkMetadata,
+  AgentTrace,
+  AgentStep
+} from '../collections/TracingCollection';
+
+// Import TracingEngine for internal use
+import type { TracingEngine } from './TracingEngine';
 
 // Tracing engine types
 export type {
@@ -81,7 +95,7 @@ export class TracingUtils {
     frameworkCallTime?: number;
     responseProcessingTime?: number;
     memoryStorageTime?: number;
-  }): PerformanceMetrics {
+  }): TracingPerformanceMetrics {
     const totalDuration = Object.values(timings).reduce((sum, time) => sum + (time || 0), 0);
     
     return {

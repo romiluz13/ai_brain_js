@@ -458,7 +458,10 @@ export class CulturalKnowledgeEngine {
     // Calculate cultural competency
     const cultural_competency = {
       overall_score: adaptationAnalysis.overallAdaptation,
-      strongest_cultures: adaptationAnalysis.strongestCultures,
+      strongest_cultures: adaptationAnalysis.strongestCultures.map((c: any) => ({
+        culture: c.culture,
+        score: c.adaptation
+      })),
       improvement_areas: adaptationAnalysis.improvementAreas,
       adaptation_velocity: this.calculateAdaptationVelocity(culturalKnowledge)
     };

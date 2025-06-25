@@ -6,7 +6,7 @@
  * framework integrations.
  */
 
-import { UniversalAIBrain } from '../brain/UniversalAIBrain';
+import { UniversalAIBrain } from '../UniversalAIBrain';
 import { TracingEngine } from '../tracing';
 import {
   FrameworkAdapter,
@@ -39,7 +39,7 @@ export abstract class BaseFrameworkAdapter<T> implements FrameworkAdapter<T> {
   /**
    * Abstract methods that each framework adapter must implement
    */
-  public abstract integrate(brain: UniversalAIBrain, tracingEngine?: TracingEngine): T;
+  public abstract integrate(brain: UniversalAIBrain, tracingEngine?: TracingEngine): Promise<T>;
   public abstract enhanceWithBrain(originalFunction: any, brain: UniversalAIBrain): any;
   public abstract getCapabilities(): FrameworkCapabilities;
 
@@ -135,7 +135,7 @@ export abstract class BaseFrameworkAdapter<T> implements FrameworkAdapter<T> {
     }
 
     try {
-      await this.brain.storeInteraction({
+      await this.brain.storeInteractionPublic({
         conversationId,
         userMessage,
         assistantResponse,
@@ -209,15 +209,7 @@ export abstract class BaseFrameworkAdapter<T> implements FrameworkAdapter<T> {
   // ABSTRACT METHODS TO BE IMPLEMENTED BY SUBCLASSES
   // ============================================================================
 
-  /**
-   * Check if the framework is available in the current environment
-   */
-  protected abstract checkFrameworkAvailability(): boolean;
-
-  /**
-   * Check if the current framework version is compatible
-   */
-  protected abstract checkVersionCompatibility(): boolean;
+  // Framework availability and compatibility methods are implemented below
 
   /**
    * Setup framework-specific integration
@@ -299,5 +291,29 @@ export abstract class BaseFrameworkAdapter<T> implements FrameworkAdapter<T> {
         console.error(`${prefix} ${message}`, data || '');
         break;
     }
+  }
+
+  /**
+   * Cleanup adapter resources
+   */
+  async cleanup(): Promise<void> {
+    // Default implementation - can be overridden by subclasses
+    this.brain = null;
+  }
+
+  /**
+   * Check if framework is available
+   */
+  public checkFrameworkAvailability(): boolean {
+    // Default implementation - should be overridden by subclasses
+    return true;
+  }
+
+  /**
+   * Check version compatibility
+   */
+  public checkVersionCompatibility(): boolean {
+    // Default implementation - should be overridden by subclasses
+    return true;
   }
 }

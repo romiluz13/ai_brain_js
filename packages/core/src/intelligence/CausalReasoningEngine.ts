@@ -373,7 +373,7 @@ export class CausalReasoningEngine {
     return relationships.map(rel => ({
       explanation: `Alternative: ${rel.relationship.cause.name} could cause ${rel.relationship.effect.name}`,
       plausibility: rel.relationship.confidence,
-      evidence: rel.evidence.empirical.observations.map(obs => obs.description),
+      evidence: rel.evidence.empirical.evidenceItems.map(item => item.description),
       causalChain: [rel]
     }));
   }
@@ -587,8 +587,7 @@ export class CausalReasoningEngine {
       },
       evidence: {
         empirical: {
-          observations: [],
-          experiments: [],
+          evidenceItems: [],
           correlations: [{
             variable1: relationship.cause,
             variable2: relationship.effect,

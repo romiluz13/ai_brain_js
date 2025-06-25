@@ -177,7 +177,13 @@ export class FrameworkOptimizationEngine {
       optimizationType,
       currentSettings,
       optimizedSettings: bestOptimization.settings,
-      performanceMetrics: bestOptimization.metrics,
+      performanceMetrics: {
+        responseTime: bestOptimization.metrics.responseTime,
+        accuracy: bestOptimization.metrics.accuracy,
+        userSatisfaction: bestOptimization.metrics.userSatisfaction,
+        costEfficiency: 1 / bestOptimization.metrics.costPerToken, // Convert cost to efficiency
+        errorRate: bestOptimization.metrics.errorCount / 100 // Convert count to rate
+      },
       testResults,
       confidence,
       lastOptimized: new Date()

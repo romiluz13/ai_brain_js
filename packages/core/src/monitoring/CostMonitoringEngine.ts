@@ -219,7 +219,7 @@ export class CostMonitoringEngine {
     this.isMonitoring = true;
 
     // Monitor tracing collection for cost events using MongoDB Change Streams
-    const changeStream = this.tracingCollection.watch([
+    const changeStream = (this.tracingCollection as any).collection.watch([
       {
         $match: {
           'fullDocument.cost': { $exists: true }
@@ -745,24 +745,33 @@ export class CostMonitoringEngine {
         operationId: trace.traceId,
         traceId: trace.traceId
       },
-      trace.cost,
       {
-        inputTokens: trace.tokensUsed?.input || 0,
-        outputTokens: trace.tokensUsed?.output || 0,
-        totalTokens: trace.tokensUsed?.total || 0,
+        model: trace.cost.totalCost || 0,
+        embedding: 0,
+        mongodb: 0,
+        vectorSearch: 0,
+        storage: 0,
+        compute: 0,
+        network: 0,
+        total: trace.cost.totalCost || 0
+      },
+      {
+        inputTokens: trace.tokensUsed?.promptTokens || 0,
+        outputTokens: trace.tokensUsed?.completionTokens || 0,
+        totalTokens: trace.tokensUsed?.totalTokens || 0,
         documentsProcessed: trace.contextUsed?.length || 0,
         vectorSearchQueries: 1,
         mongodbOperations: 1
       },
       {
-        modelPricePerToken: trace.cost.total / (trace.tokensUsed?.total || 1),
+        modelPricePerToken: trace.cost.totalCost / (trace.tokensUsed?.totalTokens || 1),
         embeddingPricePerToken: 0.0001,
         mongodbPricePerOperation: 0.001,
         vectorSearchPricePerQuery: 0.01
       },
       {
-        modelUsed: trace.framework.model || 'unknown',
-        userId: trace.userId,
+        modelUsed: trace.framework.vercelAI?.model || trace.framework.openaiAgents?.assistantId || 'unknown',
+        userId: trace.agentId.toString(),
         sessionId: trace.sessionId,
         tags: [trace.framework.frameworkName, trace.operation.type]
       }

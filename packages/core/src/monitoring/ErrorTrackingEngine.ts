@@ -185,7 +185,7 @@ export class ErrorTrackingEngine {
     this.isMonitoring = true;
 
     // Monitor tracing collection for errors using MongoDB Change Streams (official pattern)
-    const changeStream = this.tracingCollection.watch([
+    const changeStream = (this.tracingCollection as any).collection.watch([
       {
         $match: {
           'fullDocument.errors': { $exists: true, $ne: [] }
@@ -558,14 +558,14 @@ export class ErrorTrackingEngine {
       await this.trackError(
         trace.framework.frameworkName,
         error.errorType,
-        error.errorMessage,
+        error.message,
         {
           traceId: trace.traceId,
           sessionId: trace.sessionId,
           operation: trace.operation.type,
-          input: trace.operation.input
+          input: trace.operation.userInput
         },
-        this.mapErrorSeverity(error.severity)
+        this.mapErrorSeverity(this.deriveSeverityFromErrorType(error.errorType))
       );
     }
   }
@@ -792,6 +792,19 @@ export class ErrorTrackingEngine {
     } catch (error) {
       console.error('Failed to send webhook notification:', error);
     }
+  }
+
+  private deriveSeverityFromErrorType(errorType: string): string {
+    const severityMap: Record<string, string> = {
+      'safety_violation': 'fatal',
+      'mongodb_error': 'error',
+      'framework_error': 'error',
+      'network_error': 'warning',
+      'timeout_error': 'warning',
+      'validation_error': 'warning',
+      'unknown_error': 'error'
+    };
+    return severityMap[errorType] || 'error';
   }
 
   private mapErrorSeverity(severity: string): ErrorEvent['severity'] {

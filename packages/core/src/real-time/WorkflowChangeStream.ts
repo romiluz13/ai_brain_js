@@ -1,6 +1,6 @@
 import { Db, Document } from 'mongodb';
 import { ChangeStreamManager } from './ChangeStreamManager';
-import { logger } from '@mongodb-ai/utils';
+import { logger } from '../utils/logger';
 
 export class WorkflowChangeStream {
   private changeStreamManager: ChangeStreamManager;

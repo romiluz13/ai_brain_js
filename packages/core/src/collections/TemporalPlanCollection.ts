@@ -378,7 +378,7 @@ export interface PlanFilter {
   agentId?: string;
   'plan.type'?: string;
   'plan.category'?: string;
-  'plan.status'?: string;
+  'plan.status'?: string | { $in?: string[] };
   'plan.priority'?: string;
   'temporal.timeframe.startTime'?: { $gte?: Date; $lte?: Date };
   'temporal.timeframe.endTime'?: { $gte?: Date; $lte?: Date };
@@ -536,6 +536,13 @@ export class TemporalPlanCollection extends BaseCollection<TemporalPlan> {
   }
 
   /**
+   * Get a plan by its ID
+   */
+  async getPlanById(planId: string): Promise<TemporalPlan | null> {
+    return await this.collection.findOne({ 'plan.id': planId });
+  }
+
+  /**
    * Update plan progress
    */
   async updatePlanProgress(
@@ -621,7 +628,12 @@ export class TemporalPlanCollection extends BaseCollection<TemporalPlan> {
       { $sort: { timestamp: 1 } }
     ]).toArray();
 
-    return predictions;
+    return predictions.map(p => ({
+      timestamp: (p as any).timestamp || new Date(),
+      predictedState: (p as any).predictedState || {},
+      confidence: (p as any).confidence || 0,
+      factors: (p as any).factors || []
+    }));
   }
 
   /**
@@ -653,7 +665,7 @@ export class TemporalPlanCollection extends BaseCollection<TemporalPlan> {
       }
     ]).toArray();
 
-    const stats = performanceStats[0] || {
+    const stats = performanceStats[0] as any || {
       avgEfficiency: 0,
       avgTimeliness: 0,
       completedPlans: 0,
@@ -823,12 +835,7 @@ export class TemporalPlanCollection extends BaseCollection<TemporalPlan> {
     return violations;
   }
 
-  private calculateOptimizationScore(improvements: Record<string, number>, violations: string[]): number {
-    const avgImprovement = Object.values(improvements).reduce((sum, val) => sum + val, 0) / Object.keys(improvements).length;
-    const violationPenalty = violations.length * 0.1;
-
-    return Math.max(0, Math.min(1, (avgImprovement / 100) - violationPenalty));
-  }
+  // Duplicate method removed - using the improved version below
 
   private calculateOptimizationScore(improvements: Record<string, number>, violations: string[]): number {
     const improvementValues = Object.values(improvements).filter(val => !isNaN(val) && isFinite(val));

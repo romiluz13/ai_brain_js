@@ -12,7 +12,7 @@ import { VercelAIAdapter } from './VercelAIAdapter';
 import { MastraAdapter } from './MastraAdapter';
 import { OpenAIAgentsAdapter } from './OpenAIAgentsAdapter';
 import { LangChainJSAdapter } from './LangChainJSAdapter';
-import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig } from '../types';
+import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig, FrameworkDetectionResult, FrameworkInfo } from '../types';
 
 /**
  * Configuration for the Framework Adapter Manager
@@ -44,7 +44,7 @@ export interface FrameworkAdapterManagerConfig {
  */
 export interface ManagedAdapterInfo {
   /** The adapter instance */
-  adapter: BaseFrameworkAdapter;
+  adapter: BaseFrameworkAdapter<any>;
   
   /** Framework name */
   frameworkName: string;
@@ -121,7 +121,9 @@ export class FrameworkAdapterManager {
       enablePerformanceMonitoring: true,
       enableCrossAdapterLearning: true,
       defaultAdapterConfig: {
-        enablePromptEnhancement: true,
+        enableMemoryInjection: true,
+        enableContextEnhancement: true,
+        enableToolIntegration: true,
         enableLearning: true,
         enableContextInjection: true,
         maxContextItems: 5,
@@ -148,7 +150,7 @@ export class FrameworkAdapterManager {
    * Register a framework adapter
    */
   async registerAdapter(
-    adapter: BaseFrameworkAdapter,
+    adapter: BaseFrameworkAdapter<any>,
     config?: AdapterConfig
   ): Promise<boolean> {
     if (!this.brain) {
@@ -208,7 +210,7 @@ export class FrameworkAdapterManager {
   /**
    * Get an adapter by framework name
    */
-  getAdapter(frameworkName: string): BaseFrameworkAdapter | null {
+  getAdapter(frameworkName: string): BaseFrameworkAdapter<any> | null {
     const adapterInfo = this.adapters.get(frameworkName);
     return adapterInfo?.adapter || null;
   }
@@ -288,7 +290,7 @@ export class FrameworkAdapterManager {
   /**
    * Create a configured adapter instance
    */
-  private createConfiguredAdapter(frameworkName: string, config: AdapterConfig): BaseFrameworkAdapter {
+  private createConfiguredAdapter(frameworkName: string, config: AdapterConfig): BaseFrameworkAdapter<any> {
     switch (frameworkName) {
       case 'Vercel AI':
         return new VercelAIAdapter(config);
@@ -451,12 +453,11 @@ export class FrameworkAdapterManager {
 
           detectedFrameworks.push({
             name: framework.name,
-            available: true,
-            compatible: isCompatible,
-            realIntegration: realIntegrationValid,
-            capabilities: adapter.getCapabilities(),
-            adapter: adapter,
-            packageName: framework.packageName
+            version: '1.0.0', // Default version
+            isAvailable: true,
+            isCompatible: isCompatible,
+            confidence: isCompatible ? 0.9 : 0.1,
+            capabilities: adapter.getCapabilities()
           });
         } else {
           console.log(`  ❌ ${framework.name} not available`);
@@ -481,8 +482,8 @@ export class FrameworkAdapterManager {
 
     return {
       detectedFrameworks,
-      suggestions,
-      recommendedAdapter
+      recommendedFramework: recommendedAdapter,
+      confidence: detectedFrameworks.length > 0 ? 0.8 : 0.1
     };
   }
 
@@ -506,14 +507,14 @@ export class FrameworkAdapterManager {
   private getRecommendedAdapter(frameworks: FrameworkInfo[]): string | null {
     if (frameworks.length === 0) return null;
 
-    // Prioritize frameworks with real integration and compatibility
-    const realIntegrationFrameworks = frameworks.filter(f => f.realIntegration && f.compatible);
-    if (realIntegrationFrameworks.length > 0) {
-      return realIntegrationFrameworks[0].name;
+    // Prioritize frameworks with high confidence and compatibility
+    const highConfidenceFrameworks = frameworks.filter(f => f.confidence > 0.8 && f.isCompatible);
+    if (highConfidenceFrameworks.length > 0) {
+      return highConfidenceFrameworks[0].name;
     }
 
     // Fallback to compatible frameworks
-    const compatibleFrameworks = frameworks.filter(f => f.compatible);
+    const compatibleFrameworks = frameworks.filter(f => f.isCompatible);
     if (compatibleFrameworks.length > 0) {
       return compatibleFrameworks[0].name;
     }

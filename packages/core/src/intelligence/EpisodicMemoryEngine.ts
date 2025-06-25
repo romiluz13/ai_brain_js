@@ -224,7 +224,8 @@ export class EpisodicMemoryEngine {
               ...request.experience.spatial,
               proximity: {}
             },
-            participants: request.experience.participants.map(p => ({
+            participants: request.experience.participants.map((p, index) => ({
+              id: (p as any).id || `participant_${index}`,
               ...p,
               emotions: request.experience.emotions.map(e => ({
                 emotion: e.emotion,
@@ -300,9 +301,50 @@ export class EpisodicMemoryEngine {
           },
           
           learning: {
-            knowledge: request.learning?.knowledge || [],
-            skills: request.learning?.skills || [],
-            insights: request.learning?.insights || [],
+            learningItems: [
+              ...(request.learning?.knowledge || []).map((k: any) => ({
+                id: k.id || `knowledge_${Date.now()}`,
+                type: 'knowledge' as const,
+                category: k.category || 'conceptual' as const,
+                content: k.content || '',
+                confidence: k.confidence || 0.5,
+                source: k.source || 'experience',
+                timestamp: new Date(),
+                context: k.context || {},
+                importance: k.importance || 0.5,
+                retention_strength: k.retention_strength || 0.5,
+                last_accessed: new Date(),
+                access_count: 1
+              })),
+              ...(request.learning?.skills || []).map((s: any) => ({
+                id: s.id || `skill_${Date.now()}`,
+                type: 'skill' as const,
+                category: s.category || 'procedural' as const,
+                content: s.content || '',
+                confidence: s.confidence || 0.5,
+                source: s.source || 'experience',
+                timestamp: new Date(),
+                context: s.context || {},
+                importance: s.importance || 0.5,
+                retention_strength: s.retention_strength || 0.5,
+                last_accessed: new Date(),
+                access_count: 1
+              })),
+              ...(request.learning?.insights || []).map((i: any) => ({
+                id: i.id || `insight_${Date.now()}`,
+                type: 'insight' as const,
+                category: i.category || 'metacognitive' as const,
+                content: i.content || '',
+                confidence: i.confidence || 0.5,
+                source: i.source || 'experience',
+                timestamp: new Date(),
+                context: i.context || {},
+                importance: i.importance || 0.5,
+                retention_strength: i.retention_strength || 0.5,
+                last_accessed: new Date(),
+                access_count: 1
+              }))
+            ],
             patterns: []
           },
           

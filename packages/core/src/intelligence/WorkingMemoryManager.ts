@@ -223,7 +223,7 @@ export class WorkingMemoryManager {
       await this.updateAccessTracking(memories.map(m => m.id));
     }
 
-    return memories;
+    return memories as unknown as WorkingMemoryItem[];
   }
 
   /**
@@ -351,7 +351,7 @@ export class WorkingMemoryManager {
 
       // Check for promotion candidates before deletion
       for (const memory of expiredMemories) {
-        if (this.shouldPromoteMemory(memory)) {
+        if (this.shouldPromoteMemory(memory as unknown as WorkingMemoryItem)) {
           await this.promoteToLongTerm(memory.id);
         }
       }
@@ -541,7 +541,7 @@ export class WorkingMemoryManager {
         .toArray();
 
       for (const memory of toRemove) {
-        if (this.shouldPromoteMemory(memory)) {
+        if (this.shouldPromoteMemory(memory as unknown as WorkingMemoryItem)) {
           await this.promoteToLongTerm(memory.id);
         } else {
           await this.workingMemoryCollection.deleteOne({ id: memory.id });

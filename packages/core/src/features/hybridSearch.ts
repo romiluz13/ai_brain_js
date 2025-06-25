@@ -4,12 +4,12 @@ import { OpenAIEmbeddingProvider } from '../embeddings/OpenAIEmbeddingProvider';
 import { VoyageAIEmbeddingProvider } from '../embeddings/VoyageAIEmbeddingProvider';
 
 // Embedding provider interface for flexibility
-export interface EmbeddingProvider {
+export interface HybridSearchEmbeddingProvider {
   generateEmbedding(text: string): Promise<number[]>;
 }
 
 // Fallback embedding provider (mock implementation for development/testing)
-export class DefaultEmbeddingProvider implements EmbeddingProvider {
+export class DefaultEmbeddingProvider implements HybridSearchEmbeddingProvider {
   async generateEmbedding(text: string): Promise<number[]> {
     console.warn(`Using fallback mock embedding provider for: ${text.substring(0, 50)}...`);
     console.warn('WARNING: This is a mock implementation. For production, configure a real embedding provider.');
@@ -62,12 +62,12 @@ export interface SearchOptions {
  */
 export class HybridSearchEngine {
   private db: Db;
-  private embeddingProvider: EmbeddingProvider;
+  private embeddingProvider: HybridSearchEmbeddingProvider;
   private embeddingStore: MongoEmbeddingProvider<Document>;
 
   constructor(
     db: Db,
-    embeddingProvider?: EmbeddingProvider,
+    embeddingProvider?: HybridSearchEmbeddingProvider,
     collectionName: string = 'vector_embeddings'
   ) {
     this.db = db;
@@ -512,7 +512,7 @@ export class HybridSearchEngine {
    * Create default embedding provider with fallback to mock
    * Priority: Voyage AI > OpenAI > Mock
    */
-  private createDefaultEmbeddingProvider(): EmbeddingProvider {
+  private createDefaultEmbeddingProvider(): HybridSearchEmbeddingProvider {
     // Try Voyage AI first (preferred for better retrieval performance)
     const voyageApiKey = process.env.VOYAGE_API_KEY;
     if (voyageApiKey && voyageApiKey.trim() !== '') {

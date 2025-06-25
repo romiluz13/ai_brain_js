@@ -7,7 +7,7 @@
  */
 
 import { BaseFrameworkAdapter } from './BaseFrameworkAdapter';
-import { UniversalAIBrain } from '../brain/UniversalAIBrain';
+import { UniversalAIBrain } from '../UniversalAIBrain';
 import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig } from '../types';
 
 // OpenAI Agents types (will be imported from @openai/agents when available)
@@ -34,7 +34,7 @@ interface OpenAIRunResult {
   state: any;
 }
 
-export interface OpenAIAgentsAdapterConfig extends AdapterConfig {
+export interface OpenAIAgentsAdapterConfig extends Omit<AdapterConfig, 'enableToolIntegration'> {
   enableAgentEnhancement?: boolean;
   enableToolIntegration?: boolean;
   enableMemoryPersistence?: boolean;
@@ -126,7 +126,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
           );
 
           // Store interaction for learning
-          await this.brain!.storeInteraction({
+          await this.brain!.storeInteractionPublic({
             conversationId,
             userMessage: input,
             assistantResponse: result.finalOutput || JSON.stringify(result),
@@ -213,7 +213,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
 
         const result = await originalRun.call(agent, enhanced.enhancedPrompt, options);
 
-        await this.brain!.storeInteraction({
+        await this.brain!.storeInteractionPublic({
           conversationId: convId,
           userMessage: input,
           assistantResponse: result.finalOutput || JSON.stringify(result),
@@ -311,7 +311,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
           if (!this.brain) return 'MongoDB brain not available';
 
           try {
-            await this.brain.storeInteraction({
+            await this.brain.storeInteractionPublic({
               conversationId: 'openai-agents-memory',
               userMessage: 'Store memory',
               assistantResponse: content,
@@ -378,7 +378,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
             relevanceScore: r.relevanceScore
           }));
         } else {
-          await this.brain.storeInteraction({
+          await this.brain.storeInteractionPublic({
             conversationId: conversationId || 'openai-agents-default',
             userMessage: 'Memory storage',
             assistantResponse: query,
@@ -394,7 +394,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
   }
 
   // Framework-specific implementation methods
-  protected checkFrameworkAvailability(): boolean {
+  public checkFrameworkAvailability(): boolean {
     try {
       // Try to import REAL OpenAI Agents framework
       require.resolve('@openai/agents');
@@ -405,7 +405,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
     }
   }
 
-  protected checkVersionCompatibility(): boolean {
+  public checkVersionCompatibility(): boolean {
     try {
       const packageJson = require('@openai/agents/package.json');
       const version = packageJson.version;
@@ -454,8 +454,8 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
         name: config.name || 'Enhanced Agent',
         instructions: config.instructions || 'You are an enhanced agent powered by MongoDB context.',
         tools: config.tools || [],
-        handoffs: config.handoffs || [],
-        guardrails: config.guardrails || []
+        handoffs: config.handoffs || []
+        // Note: guardrails removed as not supported in current OpenAI Agents API
       });
 
       // Call REAL OpenAI Agents run function
@@ -465,9 +465,9 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
         finalOutput: result.finalOutput,
         history: result.history || [],
         state: result.state || { completed: true },
-        toolsUsed: result.newItems?.filter(item => item.type === 'tool_call') || [],
+        toolsUsed: result.newItems?.filter(item => (item as any).type === 'tool_call_item') || [],
         lastAgent: result.lastAgent,
-        runId: result.runId
+        runId: (result as any).runId
       };
     } catch (error) {
       // If OpenAI Agents not available, provide graceful fallback
@@ -494,8 +494,8 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
         name: config.name || 'Enhanced Streaming Agent',
         instructions: config.instructions || 'You are an enhanced streaming agent powered by MongoDB context.',
         tools: config.tools || [],
-        handoffs: config.handoffs || [],
-        guardrails: config.guardrails || []
+        handoffs: config.handoffs || []
+        // Note: guardrails removed as not supported in current OpenAI Agents API
       });
 
       // Call REAL OpenAI Agents run function with streaming

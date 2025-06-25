@@ -372,7 +372,7 @@ export class ChangeStreamManager extends EventEmitter {
    * Handle memory changes
    */
   private handleMemoryChange(change: ChangeStreamDocument): void {
-    const document = change.fullDocument;
+    const document = (change as any).fullDocument;
     
     if (!document || !document.metadata) {
       return;
@@ -403,7 +403,7 @@ export class ChangeStreamManager extends EventEmitter {
    * Handle workflow changes
    */
   private handleWorkflowChange(change: ChangeStreamDocument): void {
-    const document = change.fullDocument;
+    const document = (change as any).fullDocument;
     
     if (!document) {
       return;
@@ -434,7 +434,7 @@ export class ChangeStreamManager extends EventEmitter {
    * Handle context changes
    */
   private handleContextChange(change: ChangeStreamDocument): void {
-    const document = change.fullDocument;
+    const document = (change as any).fullDocument;
     
     if (!document) {
       return;
@@ -465,7 +465,7 @@ export class ChangeStreamManager extends EventEmitter {
    * Handle safety changes (alerts)
    */
   private handleSafetyChange(change: ChangeStreamDocument): void {
-    const document = change.fullDocument;
+    const document = (change as any).fullDocument;
     
     if (!document) {
       return;

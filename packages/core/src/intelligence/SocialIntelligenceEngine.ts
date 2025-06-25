@@ -472,8 +472,8 @@ export class SocialIntelligenceEngine {
   }> {
     const strongConnections = connections.filter(c => c.connection.strength.overall >= 0.7);
     const weakConnections = connections.filter(c => c.connection.strength.overall < 0.3);
-    const growingConnections = connections.filter(c => c.connection.evolution.trajectory.direction === 'strengthening');
-    const decliningConnections = connections.filter(c => c.connection.evolution.trajectory.direction === 'weakening');
+    const growingConnections = connections.filter(c => (c.connection as any).evolution?.trajectory?.direction === 'strengthening');
+    const decliningConnections = connections.filter(c => (c.connection as any).evolution?.trajectory?.direction === 'weakening');
 
     // Simplified mutual connections analysis
     const mutualConnections = connections.slice(0, 5).map(c => ({

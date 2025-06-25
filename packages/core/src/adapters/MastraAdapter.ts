@@ -127,7 +127,7 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
           const result = await this.callOriginalModel(config.model, enhancedMessages, options);
 
           // Store interaction for learning (following Mastra memory pattern)
-          await this.brain!.storeInteraction({
+          await this.brain!.storeInteractionPublic({
             conversationId: options?.threadId || agentId,
             userMessage,
             assistantResponse: result.text,
@@ -202,7 +202,7 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
         if (!this.brain) return;
         
         try {
-          await this.brain.storeInteraction({
+          await this.brain.storeInteractionPublic({
             conversationId: agentId,
             userMessage: data.input || JSON.stringify(data),
             assistantResponse: data.output || '',
@@ -244,7 +244,7 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
   }
 
   // Framework-specific implementation methods
-  protected checkFrameworkAvailability(): boolean {
+  public checkFrameworkAvailability(): boolean {
     try {
       // Try to import REAL Mastra framework
       require.resolve('@mastra/core');
@@ -255,7 +255,7 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
     }
   }
 
-  protected checkVersionCompatibility(): boolean {
+  public checkVersionCompatibility(): boolean {
     try {
       const packageJson = require('@mastra/core/package.json');
       const version = packageJson.version;
@@ -344,7 +344,7 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
       const result = await agent.generate(messages, options);
 
       return {
-        text: result.text || result.content || result,
+        text: result.text || (result as any).content || result,
         model: model?.name || 'unknown',
         usage: result.usage || { tokens: 0 }
       };
@@ -459,7 +459,9 @@ export class MastraAdapter extends BaseFrameworkAdapter<MastraAgent> {
   async validateRealIntegration(): Promise<boolean> {
     try {
       // Try to import the actual Mastra classes
-      const { Agent, Memory } = await import('@mastra/core');
+      const mastraCore = await import('@mastra/core');
+      const { Agent } = mastraCore;
+      const Memory = (mastraCore as any).Memory;
 
       // Verify they are constructors
       if (typeof Agent !== 'function' || typeof Memory !== 'function') {

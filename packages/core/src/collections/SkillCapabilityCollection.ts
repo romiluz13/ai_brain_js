@@ -652,10 +652,10 @@ export class SkillCapabilityCollection extends BaseCollection<SkillCapability> {
     );
 
     return {
-      skillDistribution,
-      proficiencyLevels,
-      learningTrends,
-      gapAnalysis,
+      skillDistribution: skillDistribution as Array<{ category: string; count: number; avgProficiency: number }>,
+      proficiencyLevels: proficiencyLevels as Array<{ level: string; count: number; percentage: number }>,
+      learningTrends: learningTrends as Array<{ skill: string; trend: number; velocity: number }>,
+      gapAnalysis: gapAnalysis as Array<{ area: string; gap: number; priority: string }>,
       recommendations
     };
   }
@@ -723,7 +723,7 @@ export class SkillCapabilityCollection extends BaseCollection<SkillCapability> {
       highProficiencySkills: result.highProficiencyCount,
       activelyLearning: result.activelyLearningCount,
       totalPracticeTime: result.totalPracticeTime || 0,
-      skillsByCategory: categoryStats
+      skillsByCategory: categoryStats as Array<{ category: string; count: number }>
     };
   }
 

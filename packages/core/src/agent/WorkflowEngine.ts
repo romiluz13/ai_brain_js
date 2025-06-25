@@ -4,10 +4,10 @@ import { AgentStateManager } from './AgentStateManager';
 import { ToolExecutor, ToolExecutionContext } from './ToolExecutor';
 import { SchemaValidator } from '../schemas/validator';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '@mongodb-ai/utils';
+import { logger } from '../utils/logger';
 
 // Workflow interfaces matching our schema
-export interface WorkflowStep {
+export interface LegacyWorkflowStep {
   step_id: string;
   agent_id: string;
   description: string;
@@ -47,7 +47,7 @@ export interface Workflow {
   workflow_definition: {
     name: string;
     version: string;
-    steps: WorkflowStep[];
+    steps: LegacyWorkflowStep[];
   };
   current_step?: number;
   execution_log: WorkflowStepExecution[];
@@ -88,7 +88,7 @@ export class WorkflowEngine {
    */
   async createWorkflow(
     workflowName: string,
-    steps: WorkflowStep[],
+    steps: LegacyWorkflowStep[],
     initialContext: Record<string, any> = {},
     options: WorkflowExecutionOptions = {}
   ): Promise<Workflow> {
@@ -186,7 +186,7 @@ export class WorkflowEngine {
   /**
    * Execute a single workflow step
    */
-  private async executeStep(workflow: Workflow, step: WorkflowStep, stepIndex: number): Promise<void> {
+  private async executeStep(workflow: Workflow, step: LegacyWorkflowStep, stepIndex: number): Promise<void> {
     const maxRetries = step.retry_count || 0;
     let attempt = 0;
     let lastError: any;
@@ -279,7 +279,7 @@ export class WorkflowEngine {
   /**
    * Prepare input for a step based on input mapping
    */
-  private prepareStepInput(step: WorkflowStep, sharedContext: Record<string, any>): Record<string, any> {
+  private prepareStepInput(step: LegacyWorkflowStep, sharedContext: Record<string, any>): Record<string, any> {
     if (!step.input_mapping) {
       return {};
     }
@@ -306,7 +306,7 @@ export class WorkflowEngine {
   /**
    * Check if step dependencies are met
    */
-  private areDependenciesMet(step: WorkflowStep, executionLog: WorkflowStepExecution[]): boolean {
+  private areDependenciesMet(step: LegacyWorkflowStep, executionLog: WorkflowStepExecution[]): boolean {
     if (!step.depends_on || step.depends_on.length === 0) {
       return true;
     }
@@ -348,7 +348,7 @@ export class WorkflowEngine {
    */
   private async logStepExecution(
     workflow: Workflow, 
-    step: WorkflowStep, 
+    step: LegacyWorkflowStep,
     status: WorkflowStepExecution['status'],
     execution?: Partial<WorkflowStepExecution>
   ): Promise<void> {

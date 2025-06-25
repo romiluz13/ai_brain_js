@@ -84,7 +84,7 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
       createdAt: now,
       updatedAt: now,
       accessCount: 0,
-      lastAccessedAt: now
+      lastAccessed: now
     };
 
     await this.validateDocument(memory);
@@ -126,8 +126,8 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
 
     const result = await this.collection.findOneAndUpdate(
       { _id: objectId },
-      { $set: updateDoc },
-      { returnDocument: 'after' }
+      { $set: updateDoc as any },
+      { returnDocument: 'after', includeResultMetadata: true } as const
     );
 
     return result.value;
@@ -302,8 +302,8 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
     const result = await this.collection.updateOne(
       { _id: objectId },
       { 
-        $set: { 
-          importance,
+        $set: {
+          importance: this.convertImportanceToNumber(importance),
           updatedAt: new Date()
         }
       }
@@ -338,7 +338,7 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
   ): Promise<boolean> {
     const objectId = typeof memoryId === 'string' ? new ObjectId(memoryId) : memoryId;
     
-    const updateDoc = expiresAt 
+    const updateDoc: any = expiresAt
       ? { $set: { expiresAt, updatedAt: new Date() } }
       : { $unset: { expiresAt: 1 }, $set: { updatedAt: new Date() } };
 
@@ -501,5 +501,18 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
       // Tag index
       this.collection.createIndex({ tags: 1 })
     ]);
+  }
+
+  /**
+   * Convert MemoryImportance enum to number
+   */
+  private convertImportanceToNumber(importance: MemoryImportance): number {
+    switch (importance) {
+      case MemoryImportance.LOW: return 1;
+      case MemoryImportance.MEDIUM: return 2;
+      case MemoryImportance.HIGH: return 3;
+      case MemoryImportance.CRITICAL: return 4;
+      default: return 2;
+    }
   }
 }

@@ -310,7 +310,7 @@ export class SelfImprovementMetrics {
     const feedbackLoops = Array.from(this.activeFeedbackLoops.values()).map(loop => ({
       loopId: loop.loopId,
       type: loop.type,
-      status: loop.isActive ? 'active' : 'paused',
+      status: (loop.isActive ? 'active' : 'paused') as 'active' | 'paused' | 'completed',
       triggerCondition: loop.triggerConditions.map(c => `${c.metric} ${c.operator} ${c.threshold}`).join(' AND '),
       lastTriggered: loop.lastTriggered || new Date(),
       improvementGenerated: loop.successRate * 10 // Simplified calculation
@@ -505,7 +505,7 @@ export class SelfImprovementMetrics {
         ? ((baseline - current) / baseline) * 100
         : ((current - baseline) / baseline) * 100;
       
-      const trend = improvement > 5 ? 'improving' : improvement < -5 ? 'declining' : 'stable';
+      const trend: 'improving' | 'stable' | 'declining' = improvement > 5 ? 'improving' : improvement < -5 ? 'declining' : 'stable';
       
       return {
         current: Math.round(current * 100) / 100,

@@ -77,7 +77,7 @@ export class ToolCollection extends BaseCollection<AgentTool> {
       _id: new ObjectId(),
       createdAt: now,
       updatedAt: now,
-      status: toolData.status || 'active',
+      status: toolData.status || ToolStatus.ACTIVE,
       executionCount: 0,
       totalCost: 0,
       metadata: toolData.metadata || {}
@@ -319,15 +319,15 @@ export class ToolCollection extends BaseCollection<AgentTool> {
     // Count executions in different time windows
     const [perMinute, perHour, perDay] = await Promise.all([
       this.executionCollection.countDocuments({
-        toolId: objectId,
+        toolId: objectId.toString(),
         createdAt: { $gte: oneMinuteAgo }
       }),
       this.executionCollection.countDocuments({
-        toolId: objectId,
+        toolId: objectId.toString(),
         createdAt: { $gte: oneHourAgo }
       }),
       this.executionCollection.countDocuments({
-        toolId: objectId,
+        toolId: objectId.toString(),
         createdAt: { $gte: oneDayAgo }
       })
     ]);

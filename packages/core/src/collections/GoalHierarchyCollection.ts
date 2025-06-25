@@ -562,8 +562,8 @@ export class GoalHierarchyCollection extends BaseCollection<Goal> {
     return {
       completionRate,
       avgDuration,
-      priorityDistribution,
-      typeAnalysis,
+      priorityDistribution: priorityDistribution as Array<{ priority: string; count: number; avgCompletion: number }>,
+      typeAnalysis: typeAnalysis as Array<{ type: string; count: number; successRate: number }>,
       difficultyAnalysis: {
         avgDifficulty,
         satisfactionCorrelation
@@ -654,7 +654,7 @@ export class GoalHierarchyCollection extends BaseCollection<Goal> {
       activeGoals: stats[0]?.activeGoals || 0,
       completedGoals: stats[0]?.completedGoals || 0,
       avgProgress: stats[0]?.avgProgress || 0,
-      goalsByLevel
+      goalsByLevel: goalsByLevel as Array<{ level: number; count: number }>
     };
   }
 

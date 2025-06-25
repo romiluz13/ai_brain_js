@@ -229,7 +229,7 @@ export class SystemHealthMonitor {
         mongodbHealth,
         frameworksHealth,
         externalHealth,
-        systemHealth
+        systemResourcesHealth
       ] = await Promise.all([
         this.checkMongoDBHealth(),
         this.checkFrameworksHealth(),
@@ -242,7 +242,7 @@ export class SystemHealthMonitor {
         mongodbHealth,
         ...Object.values(frameworksHealth),
         ...Object.values(externalHealth),
-        ...Object.values(systemHealth)
+        ...Object.values(systemResourcesHealth)
       ]);
 
       // Create system health report
@@ -254,14 +254,14 @@ export class SystemHealthMonitor {
           mongodb: mongodbHealth,
           frameworks: frameworksHealth,
           external: externalHealth,
-          system: systemHealth
+          system: systemResourcesHealth
         },
         alerts: Array.from(this.activeAlerts.values()),
         recommendations: this.generateHealthRecommendations(overallStatus, [
           mongodbHealth,
           ...Object.values(frameworksHealth),
           ...Object.values(externalHealth),
-          ...Object.values(systemHealth)
+          ...Object.values(systemResourcesHealth)
         ])
       };
 
@@ -708,7 +708,7 @@ export class SystemHealthMonitor {
     // This would implement alert logic, notifications, etc.
     
     if (systemHealth.overall === 'unhealthy') {
-      await this.createHealthAlert('critical', 'system', 'system_down', 'System health is critical');
+      await this.createHealthAlert('critical', 'system', 'service_down', 'System health is critical');
     }
   }
 
@@ -753,7 +753,7 @@ export class SystemHealthMonitor {
     await this.createHealthAlert(
       'critical',
       'health_monitor',
-      'system_down',
+      'service_down',
       'Health monitoring system failure'
     );
   }

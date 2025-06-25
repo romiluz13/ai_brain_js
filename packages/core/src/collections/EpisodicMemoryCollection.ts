@@ -665,7 +665,7 @@ export class EpisodicMemoryCollection extends BaseCollection<EpisodicMemory> {
       pipeline.push({ $limit: options.limit });
     }
 
-    return await this.collection.aggregate(pipeline).toArray();
+    return await this.collection.aggregate(pipeline).toArray() as EpisodicMemory[];
   }
 
   /**
@@ -803,7 +803,7 @@ export class EpisodicMemoryCollection extends BaseCollection<EpisodicMemory> {
     ];
 
     const results = await this.collection.aggregate(pipeline).toArray();
-    return results[0] || {
+    return results[0] as any || {
       commonExperiences: [],
       frequentLocations: [],
       socialPatterns: [],
@@ -919,8 +919,8 @@ export class EpisodicMemoryCollection extends BaseCollection<EpisodicMemory> {
             relatedMemories.push({
               memory,
               relationshipType: relType,
-              strength: connection.similarity_score || connection.strength || 0.5,
-              sharedElements: connection.shared_elements || []
+              strength: (connection as any).similarity_score || (connection as any).strength || 0.5,
+              sharedElements: (connection as any).shared_elements || []
             });
           }
         }
@@ -968,7 +968,7 @@ export class EpisodicMemoryCollection extends BaseCollection<EpisodicMemory> {
     ];
 
     const results = await this.collection.aggregate(pipeline).toArray();
-    const data = results[0];
+    const data = results[0] as any;
 
     if (!data) {
       return {

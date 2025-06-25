@@ -188,7 +188,10 @@ export class MongoEmbeddingProvider<T extends Document> implements IEmbeddingSto
    */
   async getStats(): Promise<any> {
     try {
-      return await this.collection.stats();
+      const stats = await this.collection.aggregate([
+        { $collStats: { count: {} } }
+      ]).toArray();
+      return stats[0] || null;
     } catch (error) {
       console.error('Error getting collection stats:', error);
       return null;

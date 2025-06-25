@@ -233,8 +233,10 @@ export class TemporalPlanningEngine {
 
     // Enhance predictions with scenario analysis
     const enhancedPredictions = finalPredictions.map(prediction => ({
-      ...prediction,
-      state: this.enhanceStateWithScenarios(prediction.predictedState || prediction.state || {}, request.scenarios),
+      timestamp: prediction.timestamp,
+      state: this.enhanceStateWithScenarios((prediction as any).predictedState || (prediction as any).state || {}, request.scenarios),
+      probability: (prediction as any).probability || prediction.confidence,
+      confidence: prediction.confidence,
       influencingFactors: [...(prediction.factors || []), ...request.factors]
     }));
 
@@ -296,9 +298,8 @@ export class TemporalPlanningEngine {
     // Get plan performance analysis
     const performanceAnalysis = await this.planCollection.analyzePlanPerformance();
     
-    // Get plan details - search across all agents since we don't know the agentId
-    const allPlans = await this.planCollection.collection.find({ 'plan.id': planId }).toArray();
-    const plan = allPlans[0];
+    // Get plan details using public method
+    const plan = await this.planCollection.getPlanById(planId);
 
     if (!plan) {
       throw new Error(`Plan not found: ${planId}`);
@@ -787,9 +788,7 @@ export class TemporalPlanningEngine {
 
   private generateSyntheticPredictions(request: FutureStateRequest): Array<{
     timestamp: Date;
-    predictedState?: Record<string, any>;
-    state?: Record<string, any>;
-    probability: number;
+    predictedState: Record<string, any>;
     confidence: number;
     factors: string[];
   }> {
@@ -801,12 +800,11 @@ export class TemporalPlanningEngine {
       const timestamp = new Date(now.getTime() + i * 60 * 60 * 1000);
       predictions.push({
         timestamp,
-        state: {
+        predictedState: {
           progress: i * 0.1,
           efficiency: 0.8 + (Math.random() * 0.2),
           quality: 0.85 + (Math.random() * 0.15)
         },
-        probability: 0.7 + (Math.random() * 0.3),
         confidence: 0.6 + (Math.random() * 0.4),
         factors: request.factors
       });

@@ -163,8 +163,8 @@ export class CommunicationProtocolManager {
           messageFormat: request.requirements.messageFormat,
           encoding: 'utf8',
           compression: 'none',
-          encryption: this.determineEncryption(request.requirements.securityLevel),
-          authentication: this.determineAuthentication(request.requirements.securityLevel)
+          encryption: this.determineEncryption(request.requirements.securityLevel) as 'none' | 'aes256' | 'rsa' | 'tls',
+          authentication: this.determineAuthentication(request.requirements.securityLevel) as 'none' | 'token' | 'certificate' | 'signature'
         },
         metadata: {
           description: `Auto-negotiated protocol for ${request.category}`,
@@ -201,7 +201,7 @@ export class CommunicationProtocolManager {
         }
       },
       routing: {
-        strategy: this.determineRoutingStrategy(request.communicationType),
+        strategy: this.determineRoutingStrategy(request.communicationType) as 'direct' | 'broadcast' | 'multicast' | 'anycast' | 'load_balanced',
         path: [],
         delivery: {
           attempts: 0,
@@ -365,7 +365,7 @@ export class CommunicationProtocolManager {
     }));
 
     // Update protocol with routing information
-    await this.protocolCollection.collection.updateOne(
+    await this.protocolCollection.updateOne(
       { 'protocol.id': request.protocolId },
       {
         $push: {
@@ -416,7 +416,7 @@ export class CommunicationProtocolManager {
     const adaptations = this.generateAdaptations(issues, request.suggestedChanges);
 
     // Apply adaptations
-    await this.protocolCollection.collection.updateOne(
+    await this.protocolCollection.updateOne(
       { 'protocol.id': request.protocolId },
       {
         $push: {

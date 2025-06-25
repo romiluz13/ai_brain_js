@@ -16,6 +16,7 @@
  */
 
 import { MongoClient, Db } from 'mongodb';
+import { MongoVectorStore } from './vector/MongoVectorStore';
 
 // Core Collections
 import { TracingCollection } from './collections/TracingCollection';
@@ -146,6 +147,7 @@ export class UniversalAIBrain {
   private semanticMemoryEngine!: SemanticMemoryEngine;
   private contextInjectionEngine!: ContextInjectionEngine;
   private vectorSearchEngine!: VectorSearchEngine;
+  private mongoVectorStore!: MongoVectorStore;
 
   // Cognitive Intelligence Layer
   private emotionalIntelligenceEngine!: EmotionalIntelligenceEngine;
@@ -255,15 +257,17 @@ export class UniversalAIBrain {
 
     try {
       const memoryDoc = {
-        ...memory,
-        id: new Date().getTime().toString(),
-        createdAt: new Date(),
-        updatedAt: new Date()
+        agentId: this.getAgentId(),
+        conversationId: memory.metadata?.conversationId || 'default',
+        memoryType: memory.type,
+        content: memory.content,
+        importance: memory.importance,
+        metadata: memory.metadata || {}
       };
 
-      await this.memoryCollection.createMemory(memoryDoc);
-      console.log(`💾 Memory stored: ${memoryDoc.id}`);
-      return memoryDoc.id;
+      const createdMemory = await this.memoryCollection.createMemory(memoryDoc);
+      console.log(`💾 Memory stored: ${createdMemory._id}`);
+      return createdMemory._id.toString();
     } catch (error) {
       console.error('Failed to store memory:', error);
       throw error;
@@ -443,12 +447,12 @@ export class UniversalAIBrain {
       );
 
       // 3. Vector search for relevant information
-      const relevantMemories = await this.vectorSearchEngine.searchSimilar(
+      const relevantMemories = await this.vectorSearchEngine.semanticSearch(
         inputValidation.filteredContent || input,
         {
           limit: 10,
-          threshold: this.config.intelligence.similarityThreshold,
-          includeMetadata: true
+          minScore: this.config.intelligence.similarityThreshold,
+          includeExplanation: true
         }
       );
 
@@ -477,7 +481,7 @@ export class UniversalAIBrain {
             tokensUsed: processedResult.tokensUsed,
             cost: processedResult.cost,
             safetyScore: 0,
-            contextUsed: enhancedContext.sources,
+            contextUsed: enhancedContext.injectedContext.map(item => item.content),
             traceId
           }
         };
@@ -511,20 +515,17 @@ export class UniversalAIBrain {
           tokensUsed: processedResult.tokensUsed,
           cost: processedResult.cost,
           safetyScore: this.calculateSafetyScore(inputValidation, outputValidation),
-          contextUsed: enhancedContext.sources,
+          contextUsed: enhancedContext.injectedContext.map(item => item.content),
           traceId
         }
       };
 
     } catch (error) {
       // Log failure for analysis
-      await this.failureAnalysisEngine.analyzeFailure({
-        traceId,
-        framework,
-        input,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date(),
-        context
+      const now = new Date();
+      const startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
+      await this.failureAnalysisEngine.analyzeFailures(startDate, now, {
+        frameworks: [framework]
       });
 
       return {
@@ -587,6 +588,14 @@ export class UniversalAIBrain {
     this.metricsCollection = new MemoryCollection(this.database);
     this.auditCollection = new MemoryCollection(this.database);
 
+    // Initialize MongoVectorStore for safety and learning engines
+    this.mongoVectorStore = new MongoVectorStore(
+      { getDb: () => this.database } as any,
+      'ai_brain_vectors',
+      'vector_search_index',
+      'text_search_index'
+    );
+
     await Promise.all([
       this.tracingCollection.initialize(),
       this.memoryCollection.initialize(),
@@ -620,9 +629,8 @@ export class UniversalAIBrain {
         });
 
     this.semanticMemoryEngine = new SemanticMemoryEngine(this.memoryCollection, embeddingProvider);
-    this.vectorSearchEngine = new VectorSearchEngine(this.memoryCollection, embeddingProvider);
+    this.vectorSearchEngine = new VectorSearchEngine(this.database, embeddingProvider);
     this.contextInjectionEngine = new ContextInjectionEngine(
-      this.contextCollection,
       this.semanticMemoryEngine,
       this.vectorSearchEngine
     );
@@ -654,9 +662,9 @@ export class UniversalAIBrain {
   }
 
   private async initializeSafetySystems(): Promise<void> {
-    this.safetyEngine = new SafetyGuardrailsEngine();
-    this.hallucinationDetector = new HallucinationDetector(this.memoryCollection);
-    this.piiDetector = new PIIDetector();
+    this.safetyEngine = new SafetyGuardrailsEngine(this.tracingCollection, this.memoryCollection);
+    this.hallucinationDetector = new HallucinationDetector(this.tracingCollection, this.memoryCollection, this.mongoVectorStore);
+    this.piiDetector = new PIIDetector(this.tracingCollection, this.memoryCollection);
     this.complianceAuditLogger = new ComplianceAuditLogger(
       this.tracingCollection,
       this.memoryCollection,
@@ -674,7 +682,7 @@ export class UniversalAIBrain {
 
   private async initializeSelfImprovementEngines(): Promise<void> {
     this.failureAnalysisEngine = new FailureAnalysisEngine(this.tracingCollection, this.memoryCollection);
-    this.contextLearningEngine = new ContextLearningEngine(this.contextCollection, this.tracingCollection);
+    this.contextLearningEngine = new ContextLearningEngine(this.tracingCollection, this.memoryCollection, this.mongoVectorStore);
     this.frameworkOptimizationEngine = new FrameworkOptimizationEngine(this.tracingCollection, this.memoryCollection);
     this.selfImprovementMetrics = new SelfImprovementMetrics(
       this.tracingCollection,
@@ -726,41 +734,18 @@ export class UniversalAIBrain {
   }
 
   private async storeInteraction(interaction: any): Promise<void> {
-    await this.tracingCollection.storeTrace({
+    await this.tracingCollection.startTrace({
       traceId: interaction.traceId,
-      startTime: new Date(),
-      endTime: new Date(),
+      agentId: this.getAgentId() as any,
+      sessionId: interaction.sessionId || 'default',
       framework: {
         frameworkName: interaction.framework,
-        version: '1.0.0'
+        frameworkVersion: '1.0.0'
       },
       operation: {
-        type: 'chat_completion',
-        input: interaction.input,
-        output: interaction.output
-      },
-      performance: {
-        totalDuration: interaction.responseTime,
-        contextRetrievalTime: 50,
-        processingTime: interaction.responseTime - 50,
-        outputGenerationTime: 100
-      },
-      tokensUsed: {
-        input: Math.floor(interaction.tokensUsed * 0.6),
-        output: Math.floor(interaction.tokensUsed * 0.4),
-        total: interaction.tokensUsed
-      },
-      cost: {
-        model: interaction.cost * 0.8,
-        embedding: interaction.cost * 0.1,
-        mongodb: interaction.cost * 0.1,
-        total: interaction.cost
-      },
-      contextUsed: interaction.relevantMemories,
-      status: 'completed',
-      feedback: {
-        rating: 4.5,
-        accuracy: 0.9
+        type: 'chat',
+        userInput: interaction.input,
+        finalOutput: interaction.output
       }
     });
   }
@@ -783,5 +768,80 @@ export class UniversalAIBrain {
         console.error('Self-improvement process failed:', error);
       }
     });
+  }
+
+  // ============================================================================
+  // PUBLIC API METHODS (for framework adapters)
+  // ============================================================================
+
+  /**
+   * Enhance a prompt with relevant context
+   */
+  async enhancePrompt(prompt: string, options: any = {}): Promise<any> {
+    try {
+      return await this.contextInjectionEngine.enhancePrompt(prompt, options);
+    } catch (error) {
+      console.error('Prompt enhancement failed:', error);
+      return { enhancedPrompt: prompt, sources: [] };
+    }
+  }
+
+  /**
+   * Retrieve relevant context for a query
+   */
+  async retrieveRelevantContext(query: string, options: any = {}): Promise<any> {
+    try {
+      // Use semantic memory engine for context retrieval
+      return await this.semanticMemoryEngine.retrieveRelevantMemories(query, options);
+    } catch (error) {
+      console.error('Context retrieval failed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Health check for the AI Brain system
+   */
+  async healthCheck(): Promise<boolean> {
+    try {
+      // Check MongoDB connection
+      await this.db.admin().ping();
+
+      // Check if collections are accessible
+      await this.memoryCollection.findMany({}, { limit: 1 });
+
+      return true;
+    } catch (error) {
+      console.error('Health check failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get vector store instance (for framework integrations)
+   */
+  get vectorStore() {
+    return this.vectorSearchEngine;
+  }
+
+  /**
+   * Store interaction publicly (for framework adapters)
+   */
+  async storeInteractionPublic(interaction: any): Promise<void> {
+    return this.storeInteraction(interaction);
+  }
+
+  /**
+   * Get agent ID (for framework integrations)
+   */
+  getAgentId(): string {
+    return (this.config as any).agentId || 'default-agent';
+  }
+
+  /**
+   * Get database instance (for internal use)
+   */
+  get db() {
+    return this.database;
   }
 }

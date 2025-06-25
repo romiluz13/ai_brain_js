@@ -409,6 +409,59 @@ export class CausalRelationshipCollection extends BaseCollection<CausalRelations
   }
 
   /**
+   * Find causal patterns for an agent
+   */
+  async findCausalPatterns(agentId: string): Promise<{
+    strongestCauses: Array<{ causeId: string; averageStrength: number; frequency: number }>;
+    commonEffects: Array<{ effectId: string; frequency: number; averageImpact: number }>;
+    causalCategories: Array<{ category: string; count: number; averageStrength: number }>;
+    temporalPatterns: Array<{ pattern: string; frequency: number; averageDelay: number }>;
+  }> {
+    const relationships = await this.getAgentCausalRelationships(agentId);
+
+    const strongestCauses = relationships
+      .filter(r => r.relationship.type === 'direct')
+      .map(r => ({
+        causeId: r.relationship.cause.id,
+        averageStrength: r.relationship.strength,
+        frequency: 1
+      }));
+
+    const commonEffects = relationships
+      .map(r => ({
+        effectId: r.relationship.effect.id,
+        frequency: 1,
+        averageImpact: r.relationship.effect.magnitude
+      }));
+
+    const causalCategories = relationships
+      .reduce((acc, r) => {
+        const existing = acc.find(c => c.category === r.relationship.category);
+        if (existing) {
+          existing.count++;
+          existing.averageStrength = (existing.averageStrength + r.relationship.strength) / 2;
+        } else {
+          acc.push({
+            category: r.relationship.category,
+            count: 1,
+            averageStrength: r.relationship.strength
+          });
+        }
+        return acc;
+      }, [] as Array<{ category: string; count: number; averageStrength: number }>);
+
+    const temporalPatterns = relationships
+      .filter(r => r.relationship.type === 'temporal')
+      .map(r => ({
+        pattern: `${r.relationship.cause.id} -> ${r.relationship.effect.id}`,
+        frequency: 1,
+        averageDelay: r.relationship.effect.delay || 0
+      }));
+
+    return { strongestCauses, commonEffects, causalCategories, temporalPatterns };
+  }
+
+  /**
    * Traverse causal chain using MongoDB's $graphLookup
    * Based on official MongoDB documentation: https://www.mongodb.com/docs/manual/reference/operator/aggregation/graphLookup/
    */
@@ -509,10 +562,10 @@ export class CausalRelationshipCollection extends BaseCollection<CausalRelations
     const results = await this.collection.aggregate(pipeline).toArray();
 
     return results.map(result => ({
-      relationship: result,
-      depth: result.depth || 0,
-      path: result.path || [],
-      totalStrength: result.totalStrength || 0
+      relationship: result as CausalRelationship,
+      depth: (result as any).depth || 0,
+      path: (result as any).path || [],
+      totalStrength: (result as any).totalStrength || 0
     }));
   }
 }

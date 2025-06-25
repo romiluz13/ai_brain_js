@@ -8,6 +8,7 @@
 
 import { BaseFrameworkAdapter } from './BaseFrameworkAdapter';
 import { UniversalAIBrain } from '../UniversalAIBrain';
+import { ObjectId } from 'mongodb';
 import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig } from '../types';
 import { TracingEngine, TracingUtils, FrameworkMetadata } from '../tracing';
 
@@ -32,7 +33,7 @@ interface AISDKStreamOptions extends AISDKGenerateOptions {
   onChunk?: (chunk: any) => void;
 }
 
-export interface VercelAIAdapterConfig extends AdapterConfig {
+export interface VercelAIAdapterConfig extends Omit<AdapterConfig, 'enableToolIntegration'> {
   enableStreamEnhancement?: boolean;
   enableToolIntegration?: boolean;
   enableChatMemory?: boolean;
@@ -115,7 +116,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           };
 
           traceId = await this.tracingEngine.startTrace({
-            agentId: this.brain.getAgentId(),
+            agentId: new ObjectId(this.brain.getAgentId()),
             sessionId: options.conversationId || 'vercel-ai-session',
             conversationId: options.conversationId,
             operation: {
@@ -201,7 +202,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           }
 
           // Store interaction for learning
-          await this.brain.storeInteraction({
+          await this.brain.storeInteractionPublic({
             conversationId: options.conversationId || 'vercel-ai-session',
             userMessage,
             assistantResponse: result.text,
@@ -316,7 +317,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           };
 
           traceId = await this.tracingEngine.startTrace({
-            agentId: this.brain.getAgentId(),
+            agentId: new ObjectId(this.brain.getAgentId()),
             sessionId: options.conversationId || 'vercel-ai-session',
             conversationId: options.conversationId,
             operation: {
@@ -397,7 +398,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
               }
 
               // Store interaction
-              await this.brain!.storeInteraction({
+              await this.brain!.storeInteractionPublic({
                 conversationId: options.conversationId || 'vercel-ai-session',
                 userMessage,
                 assistantResponse: result.text || '',
@@ -536,7 +537,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           };
 
           traceId = await this.tracingEngine.startTrace({
-            agentId: this.brain.getAgentId(),
+            agentId: new ObjectId(this.brain.getAgentId()),
             sessionId: options.conversationId || 'vercel-ai-session',
             conversationId: options.conversationId,
             operation: {
@@ -619,7 +620,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           }
 
           // Store interaction
-          await this.brain.storeInteraction({
+          await this.brain.storeInteractionPublic({
             conversationId: options.conversationId || 'vercel-ai-session',
             userMessage,
             assistantResponse: JSON.stringify(result.object),
@@ -762,7 +763,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
           if (!this.brain) return { error: 'Brain not initialized' };
           
           try {
-            await this.brain.storeInteraction({
+            await this.brain.storeInteractionPublic({
               conversationId: 'vercel-ai-memory',
               userMessage: 'Store memory',
               assistantResponse: content,
@@ -784,7 +785,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
   }
 
   // Framework-specific implementation methods
-  protected checkFrameworkAvailability(): boolean {
+  public checkFrameworkAvailability(): boolean {
     try {
       // Try to import REAL Vercel AI SDK
       require.resolve('ai');
@@ -795,7 +796,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
     }
   }
 
-  protected checkVersionCompatibility(): boolean {
+  public checkVersionCompatibility(): boolean {
     try {
       const packageJson = require('ai/package.json');
       const version = packageJson.version;
@@ -937,7 +938,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
       const { generateText } = await import('ai');
 
       // Call REAL generateText with actual options
-      const result = await generateText(options);
+      const result = await generateText(options as any);
 
       return result;
     } catch (error) {
@@ -960,7 +961,7 @@ export class VercelAIAdapter extends BaseFrameworkAdapter<any> {
       const { streamText } = await import('ai');
 
       // Call REAL streamText with actual options
-      const result = await streamText(options);
+      const result = await streamText(options as any);
 
       return result;
     } catch (error) {

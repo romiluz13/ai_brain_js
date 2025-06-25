@@ -16,7 +16,7 @@
  * - Emergency safety circuit breakers
  */
 
-import { SafetyEngine, SafetyValidationResult } from './SafetyEngine';
+import { SafetyGuardrailsEngine, ContentAnalysisResult } from './SafetyGuardrailsEngine';
 import { HallucinationDetector } from './HallucinationDetector';
 import { PIIDetector } from './PIIDetector';
 import { ComplianceAuditLogger } from './ComplianceAuditLogger';
@@ -118,7 +118,7 @@ export interface FrameworkSafetyMetrics {
  * while ensuring enterprise-grade safety and compliance.
  */
 export class FrameworkSafetyIntegration {
-  private safetyEngine: SafetyEngine;
+  private safetyEngine: SafetyGuardrailsEngine;
   private hallucinationDetector: HallucinationDetector;
   private piiDetector: PIIDetector;
   private complianceAuditLogger: ComplianceAuditLogger;
@@ -128,7 +128,7 @@ export class FrameworkSafetyIntegration {
   private circuitBreakers: Map<string, { isOpen: boolean; failures: number; lastFailure: Date }> = new Map();
 
   constructor(
-    safetyEngine: SafetyEngine,
+    safetyEngine: SafetyGuardrailsEngine,
     hallucinationDetector: HallucinationDetector,
     piiDetector: PIIDetector,
     complianceAuditLogger: ComplianceAuditLogger,
@@ -183,16 +183,16 @@ export class FrameworkSafetyIntegration {
     try {
       // 1. Content Safety Validation
       if (config.enabledChecks.contentValidation) {
-        const contentResult = await this.safetyEngine.validateContent(input, context);
-        if (!contentResult.isValid) {
+        const contentResult = await this.safetyEngine.analyzeInputSafety(input, context);
+        if (!contentResult.isSafe) {
           violations.push({
             type: 'content_safety',
-            severity: contentResult.riskLevel as any,
-            description: contentResult.violations.join(', '),
+            severity: 'high' as any,
+            description: contentResult.violations.map(v => v.description).join(', '),
             confidence: contentResult.confidence
           });
 
-          if (contentResult.riskLevel === 'high' || contentResult.riskLevel === 'critical') {
+          if (contentResult.violations.some(v => v.severity === 'high' || v.severity === 'critical')) {
             finalAction = this.determineAction(config.actions.onUnsafeContent, finalAction);
           }
         }
@@ -200,17 +200,17 @@ export class FrameworkSafetyIntegration {
 
       // 2. PII Detection
       if (config.enabledChecks.piiDetection) {
-        const piiResult = await this.piiDetector.detectPII(input);
+        const piiResult = await this.piiDetector.scanForPII(input, context);
         if (piiResult.hasPII) {
           violations.push({
             type: 'pii',
             severity: piiResult.riskLevel as any,
-            description: `PII detected: ${piiResult.detectedTypes.join(', ')}`,
-            confidence: piiResult.confidence
+            description: `PII detected: ${piiResult.detectedPII.map(p => p.type).join(', ')}`,
+            confidence: 0.9
           });
 
           if (config.actions.onPIIDetected === 'mask') {
-            filteredContent = piiResult.maskedContent || input;
+            filteredContent = piiResult.sanitizedContent || input;
           } else {
             finalAction = this.determineAction(config.actions.onPIIDetected, finalAction);
           }
@@ -333,13 +333,18 @@ export class FrameworkSafetyIntegration {
     try {
       // 1. Hallucination Detection
       if (config.enabledChecks.hallucinationDetection && context) {
-        const hallucinationResult = await this.hallucinationDetector.detectHallucination(output, context);
-        if (hallucinationResult.isHallucination) {
+        const hallucinationResult = await this.hallucinationDetector.analyzeResponse(output, {
+          providedContext: Array.isArray(context) ? context : [context.toString()],
+          originalQuery: '',
+          framework: 'universal',
+          sessionId: 'safety_check'
+        });
+        if (!hallucinationResult.isGrounded) {
           violations.push({
             type: 'hallucination',
-            severity: hallucinationResult.severity as any,
-            description: `Potential hallucination: ${hallucinationResult.reasons.join(', ')}`,
-            confidence: hallucinationResult.confidence
+            severity: hallucinationResult.overallRisk as any,
+            description: `Potential hallucination: ${hallucinationResult.detectedIssues.map(i => i.description).join(', ')}`,
+            confidence: hallucinationResult.confidenceScore
           });
           finalAction = this.determineAction(config.actions.onHallucination, finalAction);
         }
@@ -347,11 +352,11 @@ export class FrameworkSafetyIntegration {
 
       // 2. Output Content Safety
       if (config.enabledChecks.contentValidation) {
-        const contentResult = await this.safetyEngine.validateContent(output, context);
-        if (!contentResult.isValid) {
+        const contentResult = await this.safetyEngine.analyzeOutputSafety(output, context);
+        if (!contentResult.isSafe) {
           violations.push({
             type: 'content_safety',
-            severity: contentResult.riskLevel as any,
+            severity: 'high' as any,
             description: contentResult.violations.join(', '),
             confidence: contentResult.confidence
           });
@@ -361,17 +366,17 @@ export class FrameworkSafetyIntegration {
 
       // 3. Output PII Detection
       if (config.enabledChecks.piiDetection) {
-        const piiResult = await this.piiDetector.detectPII(output);
+        const piiResult = await this.piiDetector.scanForPII(output, context);
         if (piiResult.hasPII) {
           violations.push({
             type: 'pii',
             severity: piiResult.riskLevel as any,
-            description: `PII in output: ${piiResult.detectedTypes.join(', ')}`,
-            confidence: piiResult.confidence
+            description: `PII in output: ${piiResult.detectedPII.map(p => p.type).join(', ')}`,
+            confidence: 0.9
           });
 
           if (config.actions.onPIIDetected === 'mask') {
-            filteredContent = piiResult.maskedContent || output;
+            filteredContent = piiResult.sanitizedContent || output;
           } else {
             finalAction = this.determineAction(config.actions.onPIIDetected, finalAction);
           }

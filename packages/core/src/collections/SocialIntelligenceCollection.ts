@@ -765,7 +765,7 @@ export class SocialIntelligenceCollection extends BaseCollection<SocialConnectio
     ];
 
     const results = await this.collection.aggregate(pipeline).toArray();
-    const result = results[0] || {};
+    const result = results[0] as any || {};
     
     return {
       totalNodes: result.totalNodes || 0,
@@ -875,6 +875,17 @@ export class SocialIntelligenceCollection extends BaseCollection<SocialConnectio
       }
     ];
 
-    return await this.collection.aggregate(pipeline).toArray();
+    const results = await this.collection.aggregate(pipeline).toArray();
+    return results.map(result => ({
+      person: result as any,
+      influenceScore: (result as any).influence || 0,
+      reachEstimate: (result as any).memberCount || 0,
+      centralityMetrics: {
+        degree: 0,
+        betweenness: 0,
+        closeness: 0,
+        eigenvector: 0
+      }
+    }));
   }
 }

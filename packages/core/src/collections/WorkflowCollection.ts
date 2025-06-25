@@ -70,9 +70,8 @@ export class WorkflowCollection extends BaseCollection<AgentWorkflow> {
       _id: new ObjectId(),
       createdAt: now,
       updatedAt: now,
-      status: workflowData.status || 'pending',
+      status: workflowData.status || WorkflowStatus.DRAFT,
       currentStepIndex: 0,
-      variables: workflowData.variables || {},
       metadata: workflowData.metadata || {}
     };
 
@@ -131,12 +130,12 @@ export class WorkflowCollection extends BaseCollection<AgentWorkflow> {
       updatedAt: now
     };
 
-    if (status === 'running' && !await this.hasStartedAt(objectId)) {
-      updateDoc.startedAt = now;
+    if (status === WorkflowStatus.ACTIVE && !await this.hasStartedAt(objectId)) {
+      (updateDoc as any).startedAt = now;
     }
 
-    if (status === 'completed' || status === 'failed') {
-      updateDoc.completedAt = now;
+    if (status === WorkflowStatus.COMPLETED || status === WorkflowStatus.FAILED) {
+      (updateDoc as any).completedAt = now;
     }
 
     if (error) {
@@ -295,8 +294,8 @@ export class WorkflowCollection extends BaseCollection<AgentWorkflow> {
    */
   async getRunningWorkflows(): Promise<AgentWorkflow[]> {
     return await this.collection
-      .find({ status: 'running' })
-      .sort({ startedAt: 1 })
+      .find({ status: WorkflowStatus.ACTIVE })
+      .sort({ startedAt: 1 } as any)
       .toArray();
   }
 
@@ -425,7 +424,7 @@ export class WorkflowCollection extends BaseCollection<AgentWorkflow> {
     const cutoffDate = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
     
     const result = await this.collection.deleteMany({
-      status: { $in: ['completed', 'failed', 'cancelled'] },
+      status: { $in: [WorkflowStatus.COMPLETED, WorkflowStatus.FAILED, WorkflowStatus.CANCELLED] },
       completedAt: { $lt: cutoffDate }
     });
 

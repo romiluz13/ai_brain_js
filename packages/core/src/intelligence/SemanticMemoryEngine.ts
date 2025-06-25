@@ -17,6 +17,7 @@
 import { MemoryCollection } from '../collections/MemoryCollection';
 import { OpenAIEmbeddingProvider } from '../embeddings/OpenAIEmbeddingProvider';
 import { EmbeddingProvider } from '../vector/MongoVectorStore';
+import { MemoryImportance } from '../types';
 
 export interface Memory {
   id: string;
@@ -161,9 +162,9 @@ export class SemanticMemoryEngine {
         sessionId: memory.metadata.sessionId,
         userId: memory.metadata.userId,
         tags: memory.metadata.tags,
-        ttl: memory.ttl
-      },
-      embedding
+        ttl: memory.ttl,
+        embedding: embedding
+      }
     );
 
     // Update cache
@@ -305,13 +306,16 @@ export class SemanticMemoryEngine {
     memory.metadata.updated = new Date();
 
     // Store updated memory
-    await this.memoryCollection.updateDocument(
+    await this.memoryCollection.updateMemory(
       memoryId,
-      JSON.stringify(memory),
       {
-        importance: adjustedImportance,
-        updated: memory.metadata.updated,
-        updateReason: reason || 'importance_update'
+        importance: this.convertToMemoryImportance(adjustedImportance),
+        content: JSON.stringify(memory),
+        metadata: {
+          ...memory.metadata,
+          updated: memory.metadata.updated,
+          updateReason: reason || 'importance_update'
+        }
       }
     );
 
@@ -349,15 +353,19 @@ export class SemanticMemoryEngine {
 
     // Update both memories
     await Promise.all([
-      this.memoryCollection.updateDocument(
+      this.memoryCollection.updateMemory(
         memoryId1,
-        JSON.stringify(memory1),
-        { relationshipType, relatedTo: memoryId2 }
+        {
+          content: JSON.stringify(memory1),
+          metadata: { relationshipType, relatedTo: memoryId2 }
+        }
       ),
-      this.memoryCollection.updateDocument(
+      this.memoryCollection.updateMemory(
         memoryId2,
-        JSON.stringify(memory2),
-        { relationshipType, relatedTo: memoryId1 }
+        {
+          content: JSON.stringify(memory2),
+          metadata: { relationshipType, relatedTo: memoryId1 }
+        }
       )
     ]);
 
@@ -513,16 +521,25 @@ export class SemanticMemoryEngine {
       if (memory) {
         memory.metadata.accessCount++;
         memory.metadata.lastAccessed = new Date();
-        await this.memoryCollection.updateDocument(
+        await this.memoryCollection.updateMemory(
           memoryId,
-          JSON.stringify(memory),
-          { accessCount: memory.metadata.accessCount, lastAccessed: memory.metadata.lastAccessed }
+          {
+            content: JSON.stringify(memory),
+            metadata: { accessCount: memory.metadata.accessCount, lastAccessed: memory.metadata.lastAccessed }
+          }
         );
         this.updateCache(memory);
       }
     });
 
     await Promise.all(updatePromises);
+  }
+
+  private convertToMemoryImportance(value: number): MemoryImportance {
+    if (value >= 0.8) return MemoryImportance.CRITICAL;
+    if (value >= 0.6) return MemoryImportance.HIGH;
+    if (value >= 0.4) return MemoryImportance.MEDIUM;
+    return MemoryImportance.LOW;
   }
 
   private async getRelatedMemories(memories: Memory[]): Promise<Memory[]> {

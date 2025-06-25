@@ -7,9 +7,165 @@
  */
 
 import { ObjectId } from 'mongodb';
+import { BaseDocument } from '../collections/BaseCollection';
+import type { UniversalAIBrain } from '../UniversalAIBrain';
+
+// ============================================================================
+// FORWARD DECLARATIONS
+// ============================================================================
+
+// UniversalAIBrain is imported from '../UniversalAIBrain' above
 
 // ============================================================================
 // CORE BRAIN TYPES
+// ============================================================================
+
+export interface Agent {
+  _id?: ObjectId;
+  id?: string;
+  name: string;
+  description?: string;
+  instructions?: string;
+  status: AgentStatus;
+  configuration: AgentConfiguration;
+  tags?: string[];
+  metadata?: Record<string, any>;
+  lastActiveAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AgentConfiguration {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  systemPrompt?: string;
+  tools?: string[];
+}
+
+export enum AgentStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PAUSED = 'paused',
+  ERROR = 'error'
+}
+
+export interface AgentMemory extends BaseDocument {
+  agentId: string;
+  conversationId?: string;
+  memoryType: string;
+  content: string;
+  importance: number;
+  metadata: Record<string, any>;
+  expiresAt?: Date;
+  type?: MemoryType;
+  accessCount?: number;
+  lastAccessed?: Date;
+}
+
+export enum MemoryType {
+  CONVERSATION = 'conversation',
+  FACT = 'fact',
+  PROCEDURE = 'procedure',
+  EXPERIENCE = 'experience'
+}
+
+export enum MemoryImportance {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+export interface AgentPerformanceMetrics extends BaseDocument {
+  agentId: string;
+  timestamp: Date;
+  recordedAt?: Date;
+  responseTime: number;
+  accuracy: number;
+  userSatisfaction: number;
+  costPerOperation: number;
+  errorCount: number;
+  successRate: number;
+  value?: any;
+}
+
+export enum ToolStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DEPRECATED = 'deprecated',
+  ERROR = 'error'
+}
+
+export interface AgentTool extends BaseDocument {
+  agentId: string;
+  name: string;
+  description: string;
+  category: string;
+  status: ToolStatus;
+  configuration: Record<string, any>;
+  metadata: Record<string, any>;
+  executionCount?: number;
+  totalCost?: number;
+  rateLimits?: Record<string, any>;
+  value?: any;
+}
+
+export interface ToolExecution extends BaseDocument {
+  toolId: string;
+  agentId: string;
+  executionId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  input: Record<string, any>;
+  output?: Record<string, any>;
+  error?: string;
+  startTime: Date;
+  endTime?: Date;
+  duration?: number;
+  cost?: number;
+}
+
+export enum WorkflowStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  PAUSED = 'paused',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
+}
+
+export interface WorkflowStep extends BaseDocument {
+  workflowId: string;
+  stepId: string;
+  name: string;
+  type: string;
+  configuration: Record<string, any>;
+  dependencies: string[];
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  order: number;
+  metadata: Record<string, any>;
+}
+
+export interface AgentWorkflow extends BaseDocument {
+  agentId: string;
+  name: string;
+  description: string;
+  status: WorkflowStatus;
+  steps: WorkflowStep[];
+  configuration: Record<string, any>;
+  metadata: Record<string, any>;
+  startTime?: Date;
+  endTime?: Date;
+  executionCount?: number;
+  variables?: Record<string, any>;
+  currentStepIndex?: number;
+  value?: any;
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+// ============================================================================
+// CORE BRAIN TYPES (CONTINUED)
 // ============================================================================
 
 export interface BrainConfig {
@@ -95,10 +251,27 @@ export interface Conversation {
 export interface FrameworkAdapter<T> {
   frameworkName: string;
   version: string;
-  integrate(brain: UniversalAIBrain): T;
+  integrate(brain: UniversalAIBrain, tracingEngine?: any): Promise<T>;
   enhanceWithBrain(originalFunction: any, brain: UniversalAIBrain): any;
   validateCompatibility(): boolean;
   getCapabilities(): FrameworkCapabilities;
+}
+
+export interface FrameworkDetectionResult {
+  detectedFrameworks: FrameworkInfo[];
+  recommendedFramework: string | null;
+  confidence: number;
+  suggestions?: string[];
+  recommendedAdapter?: string | null;
+}
+
+export interface FrameworkInfo {
+  name: string;
+  version: string;
+  isAvailable: boolean;
+  isCompatible: boolean;
+  confidence: number;
+  capabilities: FrameworkCapabilities;
 }
 
 export interface FrameworkCapabilities {
@@ -113,7 +286,11 @@ export interface FrameworkCapabilities {
 export interface AdapterConfig {
   enableMemoryInjection: boolean;
   enableContextEnhancement: boolean;
+  enableContextInjection?: boolean;
   enableToolIntegration: boolean;
+  enableLearning?: boolean;
+  enableSafetyChecks?: boolean;
+  enablePerformanceMonitoring?: boolean;
   maxContextItems: number;
   enhancementStrategy: 'semantic' | 'hybrid' | 'conversational';
 }
@@ -292,8 +469,7 @@ export type EmbeddingProvider = 'openai' | 'voyage-ai' | 'cohere' | 'huggingface
 
 export type SearchType = 'semantic' | 'hybrid' | 'text' | 'knowledge_graph';
 
-// Re-export from UniversalAIBrain for convenience
-export type { UniversalAIBrain } from '../UniversalAIBrain';
+// UniversalAIBrain type imported at top of file
 
 // ============================================================================
 // CONFIGURATION VALIDATION
@@ -316,22 +492,9 @@ export interface FrameworkValidationResult {
 // FRAMEWORK DETECTION TYPES
 // ============================================================================
 
-export interface FrameworkInfo {
-  name: string;
-  available: boolean;
-  compatible: boolean;
-  realIntegration?: boolean;
-  capabilities: FrameworkCapabilities;
-  adapter: any;
-  packageName?: string;
-  version?: string;
-}
+// Duplicate removed - using the one above with proper MongoDB 2025 patterns
 
-export interface FrameworkDetectionResult {
-  detectedFrameworks: FrameworkInfo[];
-  suggestions: string[];
-  recommendedAdapter: string | null;
-}
+// Duplicate removed - using the one above
 
 export interface ManagedAdapterInfo {
   frameworkName: string;

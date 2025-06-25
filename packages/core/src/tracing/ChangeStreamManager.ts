@@ -281,11 +281,11 @@ export class ChangeStreamManager extends EventEmitter {
     // Convert to our event format
     const event: TraceChangeEvent = {
       operationType: change.operationType as any,
-      traceId: change.fullDocument?.traceId || '',
-      agentId: change.fullDocument?.agentId?.toString() || '',
-      sessionId: change.fullDocument?.sessionId || '',
-      fullDocument: change.fullDocument,
-      updateDescription: change.updateDescription,
+      traceId: (change as any).fullDocument?.traceId || '',
+      agentId: (change as any).fullDocument?.agentId?.toString() || '',
+      sessionId: (change as any).fullDocument?.sessionId || '',
+      fullDocument: (change as any).fullDocument,
+      updateDescription: (change as any).updateDescription,
       timestamp: new Date(),
       resumeToken: change._id
     };

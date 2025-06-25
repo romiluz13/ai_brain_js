@@ -14,7 +14,7 @@
  * - Search caching and performance optimization
  */
 
-import { Db } from 'mongodb';
+import { Db, ObjectId } from 'mongodb';
 import { OpenAIEmbeddingProvider } from '../embeddings/OpenAIEmbeddingProvider';
 import { EmbeddingProvider } from '../vector/MongoVectorStore';
 
@@ -281,7 +281,7 @@ export class VectorSearchEngine {
 
       // Use upsert to handle both insert and update cases
       const result = await collection.replaceOne(
-        { _id: document._id },
+        { _id: new ObjectId(document._id) },
         document,
         { upsert: true }
       );
@@ -457,7 +457,7 @@ export class VectorSearchEngine {
 
     // Apply boost factors
     if (options.boost.length > 0) {
-      const boostExpression = options.boost.reduce((expr, boost) => {
+      const boostExpression = options.boost.reduce((expr: any, boost: any) => {
         return {
           $add: [
             expr,
@@ -469,7 +469,7 @@ export class VectorSearchEngine {
             }
           ]
         };
-      }, { $literal: 0 });
+      }, { $literal: 0 } as any);
 
       pipeline.push({
         $addFields: {

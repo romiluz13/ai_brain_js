@@ -192,14 +192,14 @@ export class SelfImprovementEngine {
     let priorityAdjustments = {};
 
     for (const insight of insights) {
-      if (insight.insight.includes('context_selection')) {
+      if ((insight as unknown as LearningInsight).insight.includes('context_selection')) {
         // Apply context selection improvements
-        contextFilters = this.applyContextOptimizations(insight, contextFilters);
+        contextFilters = this.applyContextOptimizations(insight as unknown as LearningInsight, contextFilters);
       }
-      
-      if (insight.insight.includes('priority_adjustment')) {
+
+      if ((insight as unknown as LearningInsight).insight.includes('priority_adjustment')) {
         // Apply priority adjustments
-        priorityAdjustments = this.applyPriorityOptimizations(insight, priorityAdjustments);
+        priorityAdjustments = this.applyPriorityOptimizations(insight as unknown as LearningInsight, priorityAdjustments);
       }
     }
 
@@ -231,12 +231,12 @@ export class SelfImprovementEngine {
     }).sort({ confidence: -1 }).limit(5).toArray();
 
     // Generate recommendations based on patterns
-    const recommendations = await this.generateRecommendations(framework, metrics, insights);
+    const recommendations = await this.generateRecommendations(framework, metrics as unknown as ImprovementMetric[], insights as unknown as LearningInsight[]);
 
     return {
       recommendations,
-      metrics,
-      insights
+      metrics: metrics as unknown as ImprovementMetric[],
+      insights: insights as unknown as LearningInsight[]
     };
   }
 

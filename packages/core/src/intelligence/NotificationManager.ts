@@ -381,7 +381,7 @@ export class NotificationManager extends EventEmitter {
       .find(query)
       .sort({ timestamp: -1 })
       .limit(limit)
-      .toArray();
+      .toArray() as unknown as NotificationEvent[];
   }
 
   /**
@@ -737,7 +737,7 @@ export class NotificationManager extends EventEmitter {
     const rules = await this.rulesCollection.find({}).toArray();
     
     for (const rule of rules) {
-      this.rules.set(rule.id, rule);
+      this.rules.set(rule.id, rule as unknown as NotificationRule);
     }
 
     console.log(`📋 Loaded ${rules.length} notification rules`);

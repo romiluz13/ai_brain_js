@@ -307,8 +307,8 @@ export interface AnalogicalFilter {
   agentId?: string;
   'mapping.type'?: string;
   'mapping.category'?: string;
-  'mapping.source.domain'?: string;
-  'mapping.target.domain'?: string;
+  'mapping.source.domain'?: string | { $in?: string[] };
+  'mapping.target.domain'?: string | { $in?: string[] };
   'mapping.strength'?: { $gte?: number; $lte?: number };
   'mapping.confidence'?: { $gte?: number; $lte?: number };
   timestamp?: { $gte?: Date; $lte?: Date };
@@ -490,9 +490,9 @@ export class AnalogicalMappingCollection extends BaseCollection<AnalogicalMappin
       const results = await this.collection.aggregate(pipeline).toArray();
       
       return results.map(result => ({
-        mapping: result,
-        score: result.vectorSearchScore || 0,
-        similarity: result.vectorSearchScore || 0 // Atlas returns similarity as score
+        mapping: result as AnalogicalMapping,
+        score: (result as any).vectorSearchScore || 0,
+        similarity: (result as any).vectorSearchScore || 0 // Atlas returns similarity as score
       }));
     } catch (error) {
       console.error('Atlas Vector Search failed:', error);

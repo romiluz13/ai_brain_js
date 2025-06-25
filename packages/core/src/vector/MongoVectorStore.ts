@@ -226,7 +226,7 @@ export class MongoVectorStore {
 
       // Add projection to exclude embeddings if not needed
       if (!options.includeEmbeddings) {
-        pipeline.push({
+        (pipeline as any[]).push({
           $project: {
             embedding: 0
           }
@@ -330,7 +330,7 @@ export class MongoVectorStore {
       ];
 
       if (options.filter && Object.keys(options.filter).length > 0) {
-        pipeline.splice(1, 0, { $match: options.filter });
+        (pipeline as any[]).splice(1, 0, { $match: options.filter });
       }
 
       const results = await this.collection.aggregate<VectorSearchResult>(pipeline).toArray();
@@ -454,11 +454,13 @@ export class MongoVectorStore {
    */
   async getStats(): Promise<any> {
     try {
-      const [stats, count, sampleDoc] = await Promise.all([
-        this.collection.stats(),
+      const [count, sampleDoc] = await Promise.all([
         this.collection.countDocuments(),
         this.collection.findOne({}, { projection: { embedding: 0 } })
       ]);
+
+      // Get collection stats using database command
+      const stats = await this.db.command({ collStats: this.collection.collectionName });
 
       return {
         collectionStats: stats,

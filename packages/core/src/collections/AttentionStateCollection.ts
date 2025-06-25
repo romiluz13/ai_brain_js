@@ -628,8 +628,8 @@ export class AttentionStateCollection extends BaseCollection<AttentionState> {
     );
 
     return {
-      focusPatterns,
-      cognitiveLoadTrends,
+      focusPatterns: focusPatterns as Array<{ taskType: string; avgFocus: number; frequency: number }>,
+      cognitiveLoadTrends: cognitiveLoadTrends as Array<{ hour: number; avgLoad: number; overloadFrequency: number }>,
       distractionAnalysis: {
         avgDistractionLevel: distractionStats[0]?.avgDistractionLevel || 0,
         topSources: [], // Would extract from distractions data

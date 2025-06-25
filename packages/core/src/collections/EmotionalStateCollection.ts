@@ -385,10 +385,10 @@ export class EmotionalStateCollection extends BaseCollection<EmotionalState> {
     ]).toArray();
 
     return {
-      dominantEmotions,
+      dominantEmotions: dominantEmotions as Array<{ emotion: string; frequency: number; avgIntensity: number }>,
       emotionalStability,
-      triggerAnalysis,
-      temporalPatterns
+      triggerAnalysis: triggerAnalysis as Array<{ trigger: string; avgValence: number; frequency: number }>,
+      temporalPatterns: temporalPatterns as Array<{ hour: number; avgValence: number; avgArousal: number }>
     };
   }
 
@@ -450,7 +450,7 @@ export class EmotionalStateCollection extends BaseCollection<EmotionalState> {
       }
     ]).toArray();
 
-    return stats[0] || {
+    return stats[0] as any || {
       totalStates: 0,
       activeStates: 0,
       expiredStates: 0,

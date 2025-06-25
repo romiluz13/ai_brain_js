@@ -7,7 +7,7 @@
  */
 
 import { BaseFrameworkAdapter } from './BaseFrameworkAdapter';
-import { UniversalAIBrain } from '../brain/UniversalAIBrain';
+import { UniversalAIBrain } from '../UniversalAIBrain';
 import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig } from '../types';
 
 // LangChain.js types (will be imported from @langchain/core when available)
@@ -84,7 +84,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
    * Create MongoDB-powered vector store for LangChain
    */
   private createMongoDBVectorStore() {
-    return class MongoDBVectorStore implements LangChainVectorStore {
+    return new (class MongoDBVectorStore implements LangChainVectorStore {
       constructor(private brain: UniversalAIBrain) {}
 
       async addDocuments(documents: any[]): Promise<void> {
@@ -135,14 +135,14 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
         const results = await this.similaritySearch(query, k);
         return results.map(doc => [doc, doc.metadata.score || 0]);
       }
-    }(this.brain!);
+    })(this.brain!);
   }
 
   /**
    * Create MongoDB-powered memory for LangChain
    */
   private createMongoDBMemory() {
-    return class MongoDBMemory implements LangChainMemory {
+    return new (class MongoDBMemory implements LangChainMemory {
       private conversationId: string;
 
       constructor(
@@ -157,7 +157,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
           const userMessage = inputs.input || inputs.question || JSON.stringify(inputs);
           const assistantResponse = outputs.output || outputs.answer || JSON.stringify(outputs);
 
-          await this.brain.storeInteraction({
+          await this.brain.storeInteractionPublic({
             conversationId: this.conversationId,
             userMessage,
             assistantResponse,
@@ -204,7 +204,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
         // In a real implementation, we might want to mark conversation as cleared
         console.log('MongoDB memory cleared for conversation:', this.conversationId);
       }
-    }(this.brain!, 'langchain_session');
+    })(this.brain!, 'langchain_session');
   }
 
   /**
@@ -323,7 +323,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
           if (!this.brain) return 'MongoDB brain not available';
 
           try {
-            await this.brain.storeInteraction({
+            await this.brain.storeInteractionPublic({
               conversationId: 'langchain_storage',
               userMessage: 'Store information',
               assistantResponse: content,
@@ -342,7 +342,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
   }
 
   // Framework-specific implementation methods
-  protected checkFrameworkAvailability(): boolean {
+  public checkFrameworkAvailability(): boolean {
     try {
       // Try to import REAL LangChain.js framework
       require.resolve('@langchain/core');
@@ -353,7 +353,7 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
     }
   }
 
-  protected checkVersionCompatibility(): boolean {
+  public checkVersionCompatibility(): boolean {
     try {
       const packageJson = require('@langchain/core/package.json');
       const version = packageJson.version;
