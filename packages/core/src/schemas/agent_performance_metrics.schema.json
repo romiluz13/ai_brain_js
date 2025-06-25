@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Performance Metrics",
+  "description": "Schema for the 'agent_performance_metrics' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "metric_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "time_window": {
+      "type": "string"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "quality": {
+      "type": "object"
+    },
+    "resources": {
+      "type": "object"
+    },
+    "errors": {
+      "type": "object"
+    }
+  },
+  "required": ["metric_id", "agent_id", "timestamp", "time_window", "metrics"]
+}

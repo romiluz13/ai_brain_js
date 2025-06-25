@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vector Embeddings",
+  "description": "Schema for the 'vector_embeddings' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "embedding_id": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "embedding": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "embedding_model": {
+      "type": "string"
+    },
+    "embedding_version": {
+      "type": "string"
+    },
+    "content": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "usage_stats": {
+      "type": "object"
+    }
+  },
+  "required": ["embedding_id", "source_type", "source_id", "created_at", "embedding", "embedding_model", "content"]
+}

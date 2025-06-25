@@ -1,0 +1,562 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentTrace",
+  "description": "Comprehensive agent tracing document for enterprise observability",
+  "type": "object",
+  "required": [
+    "traceId",
+    "agentId", 
+    "sessionId",
+    "startTime",
+    "status",
+    "operation",
+    "steps",
+    "performance",
+    "errors",
+    "contextUsed",
+    "tokensUsed",
+    "cost",
+    "framework"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "traceId": {
+      "type": "string",
+      "description": "Unique trace identifier"
+    },
+    "agentId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$",
+      "description": "Reference to agent ObjectId"
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "User session identifier"
+    },
+    "conversationId": {
+      "type": "string",
+      "description": "Conversation context identifier"
+    },
+    "startTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "totalDuration": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total duration in milliseconds"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "completed", "failed", "cancelled", "timeout"]
+    },
+    "operation": {
+      "type": "object",
+      "required": ["type", "userInput"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["generate_text", "stream_text", "generate_object", "chat", "memory_retrieval", "context_search", "custom"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "userInput": {
+          "type": "string"
+        },
+        "finalOutput": {
+          "type": "string"
+        },
+        "outputType": {
+          "type": "string",
+          "enum": ["text", "object", "stream", "error"]
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stepId", "stepType", "startTime", "status"],
+        "properties": {
+          "stepId": {
+            "type": "string"
+          },
+          "stepType": {
+            "type": "string",
+            "enum": ["context_injection", "prompt_enhancement", "framework_call", "response_processing", "safety_check", "memory_storage"]
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "running", "completed", "failed", "cancelled"]
+          },
+          "input": {},
+          "output": {},
+          "error": {
+            "$ref": "#/definitions/AgentError"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "required": [
+        "totalDuration",
+        "contextRetrievalTime", 
+        "promptEnhancementTime",
+        "frameworkCallTime",
+        "responseProcessingTime",
+        "memoryStorageTime"
+      ],
+      "properties": {
+        "totalDuration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "contextRetrievalTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "promptEnhancementTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "frameworkCallTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "responseProcessingTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "memoryStorageTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "memoryUsage": {
+          "type": "object",
+          "properties": {
+            "heapUsed": {
+              "type": "number",
+              "minimum": 0
+            },
+            "heapTotal": {
+              "type": "number",
+              "minimum": 0
+            },
+            "external": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "networkMetrics": {
+          "type": "object",
+          "properties": {
+            "requestCount": {
+              "type": "number",
+              "minimum": 0
+            },
+            "totalBytes": {
+              "type": "number",
+              "minimum": 0
+            },
+            "avgLatency": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/AgentError"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contextUsed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contextId", "source", "content", "relevanceScore", "retrievalTime"],
+        "properties": {
+          "contextId": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "relevanceScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "retrievalTime": {
+            "type": "number",
+            "minimum": 0
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "memoryOperations": {
+      "type": "object",
+      "properties": {
+        "retrieved": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stored": {
+          "type": "number",
+          "minimum": 0
+        },
+        "updated": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "tokensUsed": {
+      "type": "object",
+      "required": ["promptTokens", "completionTokens", "totalTokens"],
+      "properties": {
+        "promptTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "completionTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "embeddingTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "frameworkTokens": {
+          "type": "object",
+          "properties": {
+            "inputTokens": {
+              "type": "number",
+              "minimum": 0
+            },
+            "outputTokens": {
+              "type": "number",
+              "minimum": 0
+            },
+            "reasoningTokens": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "required": ["totalCost", "embeddingCost", "completionCost", "promptCost", "currency", "calculatedAt"],
+      "properties": {
+        "totalCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "embeddingCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "completionCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "promptCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "frameworkCosts": {
+          "type": "object",
+          "properties": {
+            "modelCost": {
+              "type": "number",
+              "minimum": 0
+            },
+            "apiCost": {
+              "type": "number",
+              "minimum": 0
+            },
+            "additionalCosts": {
+              "type": "object"
+            }
+          }
+        },
+        "mongoCosts": {
+          "type": "object",
+          "properties": {
+            "vectorSearchCost": {
+              "type": "number",
+              "minimum": 0
+            },
+            "readCost": {
+              "type": "number",
+              "minimum": 0
+            },
+            "writeCost": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD"
+        },
+        "calculatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "framework": {
+      "type": "object",
+      "required": ["frameworkName"],
+      "properties": {
+        "frameworkName": {
+          "type": "string",
+          "enum": ["vercel-ai", "mastra", "openai-agents", "langchain", "unknown"]
+        },
+        "frameworkVersion": {
+          "type": "string"
+        },
+        "vercelAI": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string"
+            },
+            "provider": {
+              "type": "string"
+            },
+            "streaming": {
+              "type": "boolean"
+            },
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "mastra": {
+          "type": "object",
+          "properties": {
+            "agentId": {
+              "type": "string"
+            },
+            "resourceId": {
+              "type": "string"
+            },
+            "threadId": {
+              "type": "string"
+            },
+            "workflowId": {
+              "type": "string"
+            }
+          }
+        },
+        "openaiAgents": {
+          "type": "object",
+          "properties": {
+            "assistantId": {
+              "type": "string"
+            },
+            "threadId": {
+              "type": "string"
+            },
+            "runId": {
+              "type": "string"
+            },
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "langchain": {
+          "type": "object",
+          "properties": {
+            "chainType": {
+              "type": "string"
+            },
+            "memoryType": {
+              "type": "string"
+            },
+            "vectorStore": {
+              "type": "string"
+            },
+            "llmProvider": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "safetyChecks": {
+      "type": "object",
+      "properties": {
+        "piiDetected": {
+          "type": "boolean"
+        },
+        "contentFiltered": {
+          "type": "boolean"
+        },
+        "hallucinationScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "complianceFlags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "debugInfo": {
+      "type": "object",
+      "properties": {
+        "environment": {
+          "type": "string"
+        },
+        "nodeVersion": {
+          "type": "string"
+        },
+        "memorySnapshot": {},
+        "stackTrace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "userContext": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "userAgent": {
+          "type": "string"
+        },
+        "ipAddress": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "AgentError": {
+      "type": "object",
+      "required": ["errorId", "errorType", "message", "timestamp", "recoverable"],
+      "properties": {
+        "errorId": {
+          "type": "string"
+        },
+        "errorType": {
+          "type": "string",
+          "enum": ["validation_error", "framework_error", "mongodb_error", "network_error", "timeout_error", "safety_violation", "unknown_error"]
+        },
+        "message": {
+          "type": "string"
+        },
+        "stack": {
+          "type": "string"
+        },
+        "code": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recoverable": {
+          "type": "boolean"
+        },
+        "retryCount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "context": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

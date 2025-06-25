@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Resource Registry",
+  "description": "Schema for the 'resource_registry' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "resource_id": {
+      "type": "string"
+    },
+    "resource_type": {
+      "type": "string",
+      "enum": ["api_tool", "database", "file_storage", "webhook"]
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["online", "offline", "degraded"]
+    },
+    "access_point": {
+      "type": "string"
+    },
+    "authentication_method": {
+      "type": "string"
+    },
+    "credential_id": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": ["resource_id", "resource_type", "name", "status", "access_point", "authentication_method"]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Human Feedback",
+  "description": "Schema for the 'human_feedback' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "feedback_id": {
+      "type": "string"
+    },
+    "workflow_id": {
+      "type": "string"
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "feedback_type": {
+      "type": "string",
+      "enum": ["correction", "reinforcement"]
+    },
+    "target_trace_step": {
+      "type": "number"
+    },
+    "correction": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "processed"]
+    }
+  },
+  "required": ["feedback_id", "user_id", "timestamp", "feedback_type", "status"]
+}

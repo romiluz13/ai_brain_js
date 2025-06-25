@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evaluations",
+  "description": "Schema for the 'evaluations' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "evaluation_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_version": {
+      "type": "string"
+    },
+    "benchmark_id": {
+      "type": "string"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task_input": {
+      "type": "object"
+    },
+    "agent_output": {
+      "type": "object"
+    },
+    "ground_truth": {
+      "type": "object"
+    },
+    "scores": {
+      "type": "object"
+    },
+    "passed": {
+      "type": "boolean"
+    }
+  },
+  "required": ["evaluation_id", "agent_id", "agent_version", "benchmark_id", "executed_at", "task_input", "agent_output", "scores", "passed"]
+}

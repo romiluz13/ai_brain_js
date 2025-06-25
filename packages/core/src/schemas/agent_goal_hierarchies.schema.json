@@ -1,0 +1,454 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_goal_hierarchies.schema.json",
+  "title": "Agent Goal Hierarchies Schema",
+  "description": "Schema for hierarchical goal management with materialized paths and tree operations",
+  "type": "object",
+  "required": [
+    "agentId",
+    "path",
+    "level",
+    "goal",
+    "status",
+    "progress",
+    "timeline",
+    "dependencies",
+    "successCriteria",
+    "context",
+    "learning",
+    "metadata"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Session identifier for goal tracking",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "path": {
+      "type": "string",
+      "description": "Materialized path for hierarchical structure",
+      "pattern": "^/root(/[a-zA-Z0-9_-]+)*$",
+      "maxLength": 500
+    },
+    "parentId": {
+      "type": "string",
+      "description": "Parent goal ObjectId"
+    },
+    "level": {
+      "type": "integer",
+      "description": "Hierarchy level (0 = root, 1 = top-level, etc.)",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "goal": {
+      "type": "object",
+      "description": "Goal definition and metadata",
+      "required": ["title", "description", "type", "priority", "category"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Goal title",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed goal description",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of goal",
+          "enum": ["objective", "task", "milestone", "action", "constraint"]
+        },
+        "priority": {
+          "type": "string",
+          "description": "Goal priority level",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "category": {
+          "type": "string",
+          "description": "Goal category",
+          "maxLength": 100
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "description": "Current goal status",
+      "enum": ["not_started", "in_progress", "blocked", "completed", "failed", "cancelled"]
+    },
+    "progress": {
+      "type": "object",
+      "description": "Goal progress tracking",
+      "required": ["percentage", "completedSubGoals", "totalSubGoals", "lastUpdated"],
+      "properties": {
+        "percentage": {
+          "type": "number",
+          "description": "Progress percentage (0-100)",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "completedSubGoals": {
+          "type": "integer",
+          "description": "Number of completed sub-goals",
+          "minimum": 0
+        },
+        "totalSubGoals": {
+          "type": "integer",
+          "description": "Total number of sub-goals",
+          "minimum": 0
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When progress was last updated"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeline": {
+      "type": "object",
+      "description": "Goal timeline and scheduling",
+      "required": ["estimatedDuration"],
+      "properties": {
+        "estimatedDuration": {
+          "type": "number",
+          "description": "Estimated duration in minutes",
+          "minimum": 0
+        },
+        "actualDuration": {
+          "type": "number",
+          "description": "Actual duration in minutes",
+          "minimum": 0
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When goal was started"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When goal was completed"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Goal deadline"
+        }
+      },
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Goal dependencies and relationships",
+      "required": ["requiredGoals", "blockedBy", "enables", "conflicts"],
+      "properties": {
+        "requiredGoals": {
+          "type": "array",
+          "description": "Goals that must be completed first",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20
+        },
+        "blockedBy": {
+          "type": "array",
+          "description": "Goals currently blocking this one",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10
+        },
+        "enables": {
+          "type": "array",
+          "description": "Goals that this one enables",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20
+        },
+        "conflicts": {
+          "type": "array",
+          "description": "Goals that conflict with this one",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "successCriteria": {
+      "type": "object",
+      "description": "Success criteria and verification",
+      "required": ["conditions", "verification"],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "description": "Success conditions",
+          "items": {
+            "type": "object",
+            "required": ["type", "description", "target", "achieved"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["metric", "boolean", "threshold", "approval"]
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "target": {
+                "description": "Target value for success"
+              },
+              "current": {
+                "description": "Current value"
+              },
+              "achieved": {
+                "type": "boolean",
+                "description": "Whether condition is achieved"
+              }
+            }
+          },
+          "maxItems": 10
+        },
+        "verification": {
+          "type": "string",
+          "description": "How success is verified",
+          "enum": ["automatic", "manual", "external"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "description": "Goal context and reasoning",
+      "required": ["trigger", "reasoning", "assumptions", "risks"],
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "What initiated this goal",
+          "maxLength": 500
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "Why this goal is important",
+          "maxLength": 1000
+        },
+        "assumptions": {
+          "type": "array",
+          "description": "Assumptions made",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "maxItems": 10
+        },
+        "risks": {
+          "type": "array",
+          "description": "Identified risks",
+          "items": {
+            "type": "object",
+            "required": ["description", "probability", "impact"],
+            "properties": {
+              "description": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "probability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "mitigation": {
+                "type": "string",
+                "maxLength": 300
+              }
+            }
+          },
+          "maxItems": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "learning": {
+      "type": "object",
+      "description": "Learning and adaptation data",
+      "required": ["difficulty", "satisfaction", "lessons", "improvements"],
+      "properties": {
+        "difficulty": {
+          "type": "number",
+          "description": "How difficult was this goal (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "satisfaction": {
+          "type": "number",
+          "description": "Satisfaction with outcome (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lessons": {
+          "type": "array",
+          "description": "Lessons learned",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "maxItems": 10
+        },
+        "improvements": {
+          "type": "array",
+          "description": "Suggested improvements",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Goal metadata",
+      "required": ["framework", "createdBy", "tags", "version"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "description": "AI framework used",
+          "enum": ["mastra", "vercel-ai", "langchain", "openai-agents", "custom"]
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Who created this goal",
+          "enum": ["agent", "user", "system"]
+        },
+        "tags": {
+          "type": "array",
+          "description": "Goal tags",
+          "items": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "maxItems": 10
+        },
+        "version": {
+          "type": "string",
+          "description": "Schema version",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was last updated"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "agentId": "customer-support-agent-001",
+      "sessionId": "session_goal_123",
+      "path": "/root/customer_service/resolve_billing_issue",
+      "level": 2,
+      "goal": {
+        "title": "Resolve Customer Billing Issue",
+        "description": "Help customer understand and resolve their billing discrepancy",
+        "type": "task",
+        "priority": "high",
+        "category": "customer_service"
+      },
+      "status": "in_progress",
+      "progress": {
+        "percentage": 60,
+        "completedSubGoals": 3,
+        "totalSubGoals": 5,
+        "lastUpdated": "2024-01-15T10:30:00Z"
+      },
+      "timeline": {
+        "estimatedDuration": 30,
+        "actualDuration": 25,
+        "startTime": "2024-01-15T10:00:00Z",
+        "deadline": "2024-01-15T11:00:00Z"
+      },
+      "dependencies": {
+        "requiredGoals": [],
+        "blockedBy": [],
+        "enables": ["follow_up_satisfaction_survey"],
+        "conflicts": []
+      },
+      "successCriteria": {
+        "conditions": [
+          {
+            "type": "boolean",
+            "description": "Customer understands the billing",
+            "target": true,
+            "current": true,
+            "achieved": true
+          },
+          {
+            "type": "metric",
+            "description": "Customer satisfaction score",
+            "target": 4,
+            "current": 4.2,
+            "achieved": true
+          }
+        ],
+        "verification": "manual"
+      },
+      "context": {
+        "trigger": "Customer complaint about billing discrepancy",
+        "reasoning": "Customer satisfaction is critical for retention",
+        "assumptions": ["Customer has access to billing portal", "Issue is resolvable"],
+        "risks": [
+          {
+            "description": "Customer may escalate if not resolved quickly",
+            "probability": 0.3,
+            "impact": 0.7,
+            "mitigation": "Escalate to supervisor if needed"
+          }
+        ]
+      },
+      "learning": {
+        "difficulty": 0.6,
+        "satisfaction": 0.8,
+        "lessons": ["Customer was confused about new billing format"],
+        "improvements": ["Provide clearer billing explanations upfront"]
+      },
+      "metadata": {
+        "framework": "mastra",
+        "createdBy": "agent",
+        "tags": ["billing", "customer_service", "urgent"],
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

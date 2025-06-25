@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Working Memory",
+  "description": "Schema for the 'agent_working_memory' collection (TTL)",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context_window": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "working_state": {
+      "type": "object"
+    },
+    "temp_findings": {
+      "type": "object"
+    }
+  },
+  "required": ["session_id", "agent_id", "created_at", "expires_at", "context_window"]
+}

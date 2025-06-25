@@ -1,0 +1,279 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_emotional_states.schema.json",
+  "title": "Agent Emotional States Schema",
+  "description": "Schema for agent emotional states with time-series optimization and TTL decay",
+  "type": "object",
+  "required": [
+    "agentId",
+    "timestamp",
+    "emotions",
+    "context",
+    "cognitiveEffects",
+    "decay",
+    "metadata"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Session identifier for conversation tracking",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this emotional state occurred"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "TTL field for automatic emotional decay"
+    },
+    "emotions": {
+      "type": "object",
+      "description": "Core emotional dimensions",
+      "required": ["primary", "intensity", "valence", "arousal", "dominance"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Primary emotion",
+          "enum": [
+            "joy", "sadness", "anger", "fear", "surprise", "disgust", "trust", "anticipation",
+            "neutral", "confusion", "frustration", "excitement", "contentment", "anxiety",
+            "pride", "shame", "guilt", "relief", "hope", "despair"
+          ]
+        },
+        "secondary": {
+          "type": "array",
+          "description": "Secondary or complex emotions",
+          "items": {
+            "type": "string",
+            "enum": [
+              "frustration", "excitement", "contentment", "anxiety", "pride", "shame",
+              "guilt", "relief", "hope", "despair", "curiosity", "boredom", "enthusiasm",
+              "disappointment", "satisfaction", "irritation", "amusement", "concern"
+            ]
+          },
+          "maxItems": 5
+        },
+        "intensity": {
+          "type": "number",
+          "description": "Emotional intensity from 0.0 to 1.0",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "valence": {
+          "type": "number",
+          "description": "Emotional valence from -1.0 (negative) to 1.0 (positive)",
+          "minimum": -1.0,
+          "maximum": 1.0
+        },
+        "arousal": {
+          "type": "number",
+          "description": "Emotional arousal from 0.0 (calm) to 1.0 (excited)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "dominance": {
+          "type": "number",
+          "description": "Emotional dominance from 0.0 (submissive) to 1.0 (dominant)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "description": "Contextual information about the emotional trigger",
+      "required": ["trigger", "triggerType", "conversationTurn"],
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "What caused this emotional state",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "triggerType": {
+          "type": "string",
+          "description": "Type of trigger that caused the emotion",
+          "enum": ["user_input", "task_completion", "error", "success", "interaction", "system_event"]
+        },
+        "conversationTurn": {
+          "type": "integer",
+          "description": "Turn number in the conversation",
+          "minimum": 0
+        },
+        "taskId": {
+          "type": "string",
+          "description": "Associated task identifier",
+          "maxLength": 100
+        },
+        "workflowId": {
+          "type": "string",
+          "description": "Associated workflow identifier",
+          "maxLength": 100
+        },
+        "previousEmotion": {
+          "type": "string",
+          "description": "Previous emotional state for transition analysis",
+          "maxLength": 50
+        }
+      },
+      "additionalProperties": false
+    },
+    "cognitiveEffects": {
+      "type": "object",
+      "description": "How this emotion affects cognitive processes",
+      "required": ["attentionModification", "memoryStrength", "decisionBias", "responseStyle"],
+      "properties": {
+        "attentionModification": {
+          "type": "number",
+          "description": "How emotion affects attention (-1.0 to 1.0)",
+          "minimum": -1.0,
+          "maximum": 1.0
+        },
+        "memoryStrength": {
+          "type": "number",
+          "description": "How memorable this emotional event is (0.0 to 1.0)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "decisionBias": {
+          "type": "number",
+          "description": "How emotion biases decisions (-1.0 to 1.0)",
+          "minimum": -1.0,
+          "maximum": 1.0
+        },
+        "responseStyle": {
+          "type": "string",
+          "description": "How emotion affects response style",
+          "enum": ["analytical", "empathetic", "assertive", "cautious", "creative"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "decay": {
+      "type": "object",
+      "description": "Emotional decay parameters",
+      "required": ["halfLife", "decayFunction", "baselineReturn"],
+      "properties": {
+        "halfLife": {
+          "type": "number",
+          "description": "Minutes until emotion intensity halves",
+          "minimum": 0.1,
+          "maximum": 10080
+        },
+        "decayFunction": {
+          "type": "string",
+          "description": "Mathematical function for emotional decay",
+          "enum": ["exponential", "linear", "logarithmic"]
+        },
+        "baselineReturn": {
+          "type": "number",
+          "description": "Minutes to return to emotional baseline",
+          "minimum": 1,
+          "maximum": 43200
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadata about emotion detection and processing",
+      "required": ["framework", "model", "confidence", "source", "version"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "description": "AI framework used",
+          "enum": ["mastra", "vercel-ai", "langchain", "openai-agents", "custom"]
+        },
+        "model": {
+          "type": "string",
+          "description": "AI model used for emotion detection",
+          "maxLength": 100
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Confidence in emotion detection (0.0 to 1.0)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of emotional state data",
+          "enum": ["detected", "inferred", "user_reported", "system_generated"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Schema version",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was last updated"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "agentId": "customer-support-agent-001",
+      "sessionId": "session_abc123",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "expiresAt": "2024-01-15T11:30:00Z",
+      "emotions": {
+        "primary": "joy",
+        "secondary": ["satisfaction", "pride"],
+        "intensity": 0.8,
+        "valence": 0.9,
+        "arousal": 0.6,
+        "dominance": 0.7
+      },
+      "context": {
+        "trigger": "Successfully resolved customer issue",
+        "triggerType": "task_completion",
+        "conversationTurn": 15,
+        "taskId": "resolve_billing_issue_001",
+        "previousEmotion": "concern"
+      },
+      "cognitiveEffects": {
+        "attentionModification": 0.3,
+        "memoryStrength": 0.9,
+        "decisionBias": 0.2,
+        "responseStyle": "empathetic"
+      },
+      "decay": {
+        "halfLife": 30,
+        "decayFunction": "exponential",
+        "baselineReturn": 60
+      },
+      "metadata": {
+        "framework": "mastra",
+        "model": "gpt-4",
+        "confidence": 0.85,
+        "source": "detected",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

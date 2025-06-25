@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Memory",
+  "description": "Schema for the 'agent_memory' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "memory_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "memory_type": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_accessed": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "access_count": {
+      "type": "number"
+    },
+    "content": {
+      "type": "object"
+    },
+    "embedding": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "embedding_model": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "usage_stats": {
+      "type": "object"
+    }
+  },
+  "required": ["memory_id", "agent_id", "memory_type", "created_at", "last_accessed", "content"]
+}

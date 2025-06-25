@@ -1,0 +1,40 @@
+# Source files
+src/
+tsconfig.build.json
+jest.config.js
+jest.setup.ts
+
+# Development files
+node_modules/
+*.log
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Testing
+coverage/
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Build artifacts
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Only include dist/ and essential files
+# Everything else is excluded by default

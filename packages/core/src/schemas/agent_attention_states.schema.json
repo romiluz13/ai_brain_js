@@ -1,0 +1,836 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_attention_states.schema.json",
+  "title": "Agent Attention States Schema",
+  "description": "Schema for real-time attention management with change streams and cognitive load balancing",
+  "type": "object",
+  "required": [
+    "agentId",
+    "timestamp",
+    "attention",
+    "cognitiveLoad",
+    "priorityQueue",
+    "distractions",
+    "contextSwitching",
+    "analytics",
+    "monitoring",
+    "metadata"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Session identifier for attention tracking",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this attention state was recorded"
+    },
+    "attention": {
+      "type": "object",
+      "description": "Current attention allocation",
+      "required": ["primary", "secondary", "totalAllocation", "efficiency"],
+      "properties": {
+        "primary": {
+          "type": "object",
+          "description": "Primary attention focus",
+          "required": ["taskId", "taskType", "focus", "priority", "startTime", "estimatedDuration"],
+          "properties": {
+            "taskId": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "taskType": {
+              "type": "string",
+              "enum": ["conversation", "analysis", "planning", "execution", "monitoring"]
+            },
+            "focus": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "priority": {
+              "type": "string",
+              "enum": ["critical", "high", "medium", "low"]
+            },
+            "startTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimatedDuration": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "secondary": {
+          "type": "array",
+          "description": "Secondary attention allocations",
+          "items": {
+            "type": "object",
+            "required": ["taskId", "taskType", "focus", "priority", "backgroundProcessing"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "taskType": {
+                "type": "string",
+                "maxLength": 50
+              },
+              "focus": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "priority": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "backgroundProcessing": {
+                "type": "boolean"
+              }
+            }
+          },
+          "maxItems": 5
+        },
+        "totalAllocation": {
+          "type": "number",
+          "description": "Total attention allocation",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "efficiency": {
+          "type": "object",
+          "description": "Attention efficiency metrics",
+          "required": ["focusQuality", "taskSwitchingCost", "distractionLevel", "attentionStability"],
+          "properties": {
+            "focusQuality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "taskSwitchingCost": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "distractionLevel": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "attentionStability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "cognitiveLoad": {
+      "type": "object",
+      "description": "Cognitive load monitoring",
+      "required": ["current", "capacity", "utilization", "overload", "breakdown", "management"],
+      "properties": {
+        "current": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "capacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "utilization": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "overload": {
+          "type": "boolean"
+        },
+        "breakdown": {
+          "type": "object",
+          "required": ["working_memory", "processing", "decision_making", "communication", "monitoring"],
+          "properties": {
+            "working_memory": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "processing": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_making": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "communication": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "monitoring": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "management": {
+          "type": "object",
+          "required": ["loadShedding", "priorityFiltering", "batchProcessing", "deferredProcessing"],
+          "properties": {
+            "loadShedding": {
+              "type": "boolean"
+            },
+            "priorityFiltering": {
+              "type": "boolean"
+            },
+            "batchProcessing": {
+              "type": "boolean"
+            },
+            "deferredProcessing": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "priorityQueue": {
+      "type": "object",
+      "description": "Priority queue management",
+      "required": ["critical", "high", "medium", "low"],
+      "properties": {
+        "critical": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["taskId", "description", "arrivalTime", "estimatedProcessingTime", "dependencies"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "arrivalTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deadline": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "estimatedProcessingTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "maxItems": 5
+              }
+            }
+          },
+          "maxItems": 10
+        },
+        "high": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["taskId", "description", "arrivalTime", "estimatedProcessingTime"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "arrivalTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deadline": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "estimatedProcessingTime": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "maxItems": 20
+        },
+        "medium": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["taskId", "description", "arrivalTime", "estimatedProcessingTime"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "arrivalTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "estimatedProcessingTime": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "maxItems": 50
+        },
+        "low": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["taskId", "description", "arrivalTime", "estimatedProcessingTime"],
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "arrivalTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "estimatedProcessingTime": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "maxItems": 100
+        }
+      },
+      "additionalProperties": false
+    },
+    "distractions": {
+      "type": "object",
+      "description": "Distraction management",
+      "required": ["active", "filtering", "protection"],
+      "properties": {
+        "active": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "type", "intensity", "duration", "impact", "filtered"],
+            "properties": {
+              "source": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "type": {
+                "type": "string",
+                "enum": ["internal", "external", "system"]
+              },
+              "intensity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "filtered": {
+                "type": "boolean"
+              }
+            }
+          },
+          "maxItems": 20
+        },
+        "filtering": {
+          "type": "object",
+          "required": ["enabled", "threshold", "whitelist", "blacklist", "adaptiveFiltering"],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "whitelist": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 20
+            },
+            "blacklist": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 50
+            },
+            "adaptiveFiltering": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "protection": {
+          "type": "object",
+          "required": ["deepFocusMode", "focusTimeRemaining", "interruptionCost"],
+          "properties": {
+            "deepFocusMode": {
+              "type": "boolean"
+            },
+            "focusTimeRemaining": {
+              "type": "number",
+              "minimum": 0
+            },
+            "interruptionCost": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "contextSwitching": {
+      "type": "object",
+      "description": "Context switching management",
+      "required": ["lastSwitch", "switchCount", "avgSwitchTime", "switchCost", "patterns", "optimization"],
+      "properties": {
+        "lastSwitch": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "switchCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "avgSwitchTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "switchCost": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["fromTask", "toTask", "frequency", "avgCost"],
+            "properties": {
+              "fromTask": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "toTask": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "frequency": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgCost": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "maxItems": 50
+        },
+        "optimization": {
+          "type": "object",
+          "required": ["batchSimilarTasks", "minimizeHighCostSwitches", "scheduleBreaks", "groupByContext"],
+          "properties": {
+            "batchSimilarTasks": {
+              "type": "boolean"
+            },
+            "minimizeHighCostSwitches": {
+              "type": "boolean"
+            },
+            "scheduleBreaks": {
+              "type": "boolean"
+            },
+            "groupByContext": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "analytics": {
+      "type": "object",
+      "description": "Attention analytics",
+      "required": ["session", "trends", "recommendations"],
+      "properties": {
+        "session": {
+          "type": "object",
+          "required": ["totalFocusTime", "taskCompletionRate", "attentionEfficiency", "distractionRate"],
+          "properties": {
+            "totalFocusTime": {
+              "type": "number",
+              "minimum": 0
+            },
+            "taskCompletionRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "attentionEfficiency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "distractionRate": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "trends": {
+          "type": "object",
+          "required": ["focusImprovement", "loadManagement", "efficiencyTrend"],
+          "properties": {
+            "focusImprovement": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "loadManagement": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "efficiencyTrend": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "monitoring": {
+      "type": "object",
+      "description": "Real-time monitoring",
+      "required": ["alertsEnabled", "thresholds", "lastAlert", "alertHistory"],
+      "properties": {
+        "alertsEnabled": {
+          "type": "boolean"
+        },
+        "thresholds": {
+          "type": "object",
+          "required": ["overloadWarning", "focusDegradation", "distractionAlert"],
+          "properties": {
+            "overloadWarning": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "focusDegradation": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "distractionAlert": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "lastAlert": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "alertHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "timestamp", "severity", "resolved"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["overload", "focus_degradation", "high_distraction"]
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              },
+              "resolved": {
+                "type": "boolean"
+              }
+            }
+          },
+          "maxItems": 100
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Attention state metadata",
+      "required": ["framework", "version", "updateTrigger", "computationTime"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "enum": ["mastra", "vercel-ai", "langchain", "openai-agents", "custom"]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "updateTrigger": {
+          "type": "string",
+          "enum": ["manual", "automatic", "change_stream", "scheduled"]
+        },
+        "computationTime": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was last updated"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "agentId": "customer-support-agent-001",
+      "sessionId": "session_attention_123",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "attention": {
+        "primary": {
+          "taskId": "customer_conversation_456",
+          "taskType": "conversation",
+          "focus": 0.8,
+          "priority": "high",
+          "startTime": "2024-01-15T10:25:00Z",
+          "estimatedDuration": 15
+        },
+        "secondary": [
+          {
+            "taskId": "background_monitoring",
+            "taskType": "monitoring",
+            "focus": 0.15,
+            "priority": "medium",
+            "backgroundProcessing": true
+          }
+        ],
+        "totalAllocation": 0.95,
+        "efficiency": {
+          "focusQuality": 0.85,
+          "taskSwitchingCost": 0.2,
+          "distractionLevel": 0.1,
+          "attentionStability": 0.9
+        }
+      },
+      "cognitiveLoad": {
+        "current": 0.7,
+        "capacity": 1.0,
+        "utilization": 0.7,
+        "overload": false,
+        "breakdown": {
+          "working_memory": 0.6,
+          "processing": 0.8,
+          "decision_making": 0.5,
+          "communication": 0.9,
+          "monitoring": 0.3
+        },
+        "management": {
+          "loadShedding": false,
+          "priorityFiltering": true,
+          "batchProcessing": false,
+          "deferredProcessing": []
+        }
+      },
+      "priorityQueue": {
+        "critical": [],
+        "high": [
+          {
+            "taskId": "urgent_escalation",
+            "description": "Handle urgent customer escalation",
+            "arrivalTime": "2024-01-15T10:32:00Z",
+            "deadline": "2024-01-15T11:00:00Z",
+            "estimatedProcessingTime": 20,
+            "dependencies": []
+          }
+        ],
+        "medium": [],
+        "low": []
+      },
+      "distractions": {
+        "active": [
+          {
+            "source": "notification_system",
+            "type": "system",
+            "intensity": 0.3,
+            "duration": 2,
+            "impact": 0.1,
+            "filtered": true
+          }
+        ],
+        "filtering": {
+          "enabled": true,
+          "threshold": 0.4,
+          "whitelist": ["critical_alerts"],
+          "blacklist": ["social_media", "non_work_notifications"],
+          "adaptiveFiltering": true
+        },
+        "protection": {
+          "deepFocusMode": false,
+          "focusTimeRemaining": 10,
+          "interruptionCost": 0.2
+        }
+      },
+      "contextSwitching": {
+        "lastSwitch": "2024-01-15T10:25:00Z",
+        "switchCount": 3,
+        "avgSwitchTime": 5.5,
+        "switchCost": 0.15,
+        "patterns": [
+          {
+            "fromTask": "email_processing",
+            "toTask": "customer_conversation",
+            "frequency": 5,
+            "avgCost": 0.2
+          }
+        ],
+        "optimization": {
+          "batchSimilarTasks": true,
+          "minimizeHighCostSwitches": true,
+          "scheduleBreaks": false,
+          "groupByContext": true
+        }
+      },
+      "analytics": {
+        "session": {
+          "totalFocusTime": 45,
+          "taskCompletionRate": 0.8,
+          "attentionEfficiency": 0.85,
+          "distractionRate": 2.5
+        },
+        "trends": {
+          "focusImprovement": 0.1,
+          "loadManagement": 0.05,
+          "efficiencyTrend": 0.15
+        },
+        "recommendations": [
+          "Consider batching similar communication tasks",
+          "Current attention allocation is well-balanced"
+        ]
+      },
+      "monitoring": {
+        "alertsEnabled": true,
+        "thresholds": {
+          "overloadWarning": 0.85,
+          "focusDegradation": 0.6,
+          "distractionAlert": 0.4
+        },
+        "lastAlert": "2024-01-15T09:45:00Z",
+        "alertHistory": [
+          {
+            "type": "focus_degradation",
+            "timestamp": "2024-01-15T09:45:00Z",
+            "severity": "medium",
+            "resolved": true
+          }
+        ]
+      },
+      "metadata": {
+        "framework": "mastra",
+        "version": "1.0.0",
+        "updateTrigger": "automatic",
+        "computationTime": 25
+      }
+    }
+  ]
+}

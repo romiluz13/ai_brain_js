@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Tools",
+  "description": "Schema for the 'agent_tools' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "tool_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "deprecated"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "config": {
+      "type": "object"
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    },
+    "rate_limits": {
+      "type": "object"
+    },
+    "cost_model": {
+      "type": "object"
+    },
+    "performance_stats": {
+      "type": "object"
+    }
+  },
+  "required": ["tool_id", "name", "description", "version", "status", "created_at", "input_schema", "output_schema"]
+}

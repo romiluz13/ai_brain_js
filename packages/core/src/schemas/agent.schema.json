@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent",
+  "description": "Schema for the 'agents' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "deprecated"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tool_id": { "type": "string" },
+          "name": { "type": "string" },
+          "config": { "type": "object" },
+          "rate_limits": { "type": "object" }
+        },
+        "required": ["tool_id", "name"]
+      }
+    },
+    "model_config": {
+      "type": "object",
+      "properties": {
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "temperature": { "type": "number" },
+        "max_tokens": { "type": "number" },
+        "system_prompt": { "type": "string" }
+      },
+      "required": ["provider", "model"]
+    },
+    "performance_targets": {
+      "type": "object",
+      "properties": {
+        "max_response_time_seconds": { "type": "number" },
+        "min_confidence_score": { "type": "number" },
+        "max_cost_per_execution": { "type": "number" }
+      }
+    }
+  },
+  "required": ["agent_id", "name", "version", "status", "created_at", "updated_at"]
+}

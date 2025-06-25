@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tool Executions",
+  "description": "Schema for the 'tool_executions' collection",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "execution_id": {
+      "type": "string"
+    },
+    "tool_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "workflow_id": {
+      "type": "string"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "input": {
+      "type": "object"
+    },
+    "output": {
+      "type": "object"
+    },
+    "performance": {
+      "type": "object"
+    },
+    "error": {
+      "type": ["object", "null"]
+    },
+    "retry_count": {
+      "type": "number"
+    },
+    "embedding": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "embedding_model": {
+      "type": "string"
+    }
+  },
+  "required": ["execution_id", "tool_id", "agent_id", "executed_at", "input", "output", "performance"]
+}

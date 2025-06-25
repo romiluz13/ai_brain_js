@@ -1,0 +1,516 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_confidence_tracking.schema.json",
+  "title": "Agent Confidence Tracking Schema",
+  "description": "Schema for multi-dimensional confidence tracking with statistical aggregations and uncertainty quantification",
+  "type": "object",
+  "required": [
+    "agentId",
+    "timestamp",
+    "context",
+    "confidence",
+    "prediction",
+    "temporal",
+    "learning",
+    "metadata"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Session identifier for confidence tracking",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this confidence measurement was recorded"
+    },
+    "context": {
+      "type": "object",
+      "description": "Context of the confidence measurement",
+      "required": ["task", "taskType", "domain", "complexity", "novelty", "stakes"],
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "What task/decision this confidence relates to",
+          "maxLength": 500
+        },
+        "taskType": {
+          "type": "string",
+          "description": "Type of task",
+          "enum": ["prediction", "classification", "generation", "reasoning", "decision"]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain of expertise",
+          "maxLength": 100
+        },
+        "complexity": {
+          "type": "number",
+          "description": "Task complexity (0-1 scale)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "novelty": {
+          "type": "number",
+          "description": "How novel/unfamiliar the task is (0-1 scale)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stakes": {
+          "type": "string",
+          "description": "Importance of being correct",
+          "enum": ["low", "medium", "high", "critical"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "object",
+      "description": "Multi-dimensional confidence measurements",
+      "required": ["overall", "epistemic", "aleatoric", "calibrated", "aspects", "sources"],
+      "properties": {
+        "overall": {
+          "type": "number",
+          "description": "Overall confidence score (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "epistemic": {
+          "type": "number",
+          "description": "Knowledge-based uncertainty (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "aleatoric": {
+          "type": "number",
+          "description": "Data-based uncertainty (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "calibrated": {
+          "type": "number",
+          "description": "Calibrated confidence (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "aspects": {
+          "type": "object",
+          "description": "Confidence breakdown by aspect",
+          "required": ["factualAccuracy", "completeness", "relevance", "clarity", "appropriateness"],
+          "properties": {
+            "factualAccuracy": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "completeness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "relevance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "clarity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "appropriateness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "sources": {
+          "type": "object",
+          "description": "Confidence sources",
+          "required": ["modelIntrinsic", "retrievalQuality", "contextRelevance", "historicalPerformance", "domainExpertise"],
+          "properties": {
+            "modelIntrinsic": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "retrievalQuality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "contextRelevance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "historicalPerformance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "domainExpertise": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "prediction": {
+      "type": "object",
+      "description": "Prediction/decision details",
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of prediction",
+          "enum": ["binary", "multiclass", "regression", "ranking", "generation"]
+        },
+        "value": {
+          "description": "The actual prediction/decision made"
+        },
+        "alternatives": {
+          "type": "array",
+          "description": "Alternative predictions",
+          "items": {
+            "type": "object",
+            "required": ["value", "confidence", "reasoning"],
+            "properties": {
+              "value": {
+                "description": "Alternative prediction value"
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "reasoning": {
+                "type": "string",
+                "maxLength": 500
+              }
+            }
+          },
+          "maxItems": 10
+        },
+        "probability": {
+          "type": "number",
+          "description": "Predicted probability",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "distribution": {
+          "type": "array",
+          "description": "Full probability distribution",
+          "items": {
+            "type": "object",
+            "required": ["value", "probability"],
+            "properties": {
+              "value": {
+                "description": "Distribution value"
+              },
+              "probability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "maxItems": 20
+        }
+      },
+      "additionalProperties": false
+    },
+    "actual": {
+      "type": "object",
+      "description": "Actual outcome for calibration",
+      "required": ["value", "correct", "verificationTime", "verificationSource"],
+      "properties": {
+        "value": {
+          "description": "The actual correct answer/outcome"
+        },
+        "correct": {
+          "type": "boolean",
+          "description": "Whether the prediction was correct"
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Accuracy score (0-1) for continuous predictions",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Human feedback on the prediction",
+          "maxLength": 1000
+        },
+        "verificationTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the outcome was verified"
+        },
+        "verificationSource": {
+          "type": "string",
+          "description": "Source of verification",
+          "enum": ["automatic", "human", "external_system"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "calibration": {
+      "type": "object",
+      "description": "Computed calibration metrics",
+      "required": ["brier", "logLoss", "reliability", "resolution", "sharpness", "overconfidence", "underconfidence"],
+      "properties": {
+        "brier": {
+          "type": "number",
+          "description": "Brier score",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "logLoss": {
+          "type": "number",
+          "description": "Log loss",
+          "minimum": 0
+        },
+        "reliability": {
+          "type": "number",
+          "description": "Reliability (calibration) score",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "resolution": {
+          "type": "number",
+          "description": "Resolution (discrimination) score",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sharpness": {
+          "type": "number",
+          "description": "Sharpness (confidence) score",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "overconfidence": {
+          "type": "number",
+          "description": "Measure of overconfidence bias",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "underconfidence": {
+          "type": "number",
+          "description": "Measure of underconfidence bias",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "temporal": {
+      "type": "object",
+      "description": "Temporal aspects of confidence",
+      "required": ["decayRate", "halfLife"],
+      "properties": {
+        "decayRate": {
+          "type": "number",
+          "description": "How quickly confidence should decay (per hour)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "halfLife": {
+          "type": "number",
+          "description": "Half-life of confidence relevance (hours)",
+          "minimum": 0.1,
+          "maximum": 8760
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this confidence measurement expires"
+        },
+        "seasonality": {
+          "type": "string",
+          "description": "Time-based patterns",
+          "maxLength": 50
+        }
+      },
+      "additionalProperties": false
+    },
+    "learning": {
+      "type": "object",
+      "description": "Learning and adaptation metrics",
+      "required": ["surprisal", "informationGain", "modelUpdate", "confidenceAdjustment"],
+      "properties": {
+        "surprisal": {
+          "type": "number",
+          "description": "How surprising was the actual outcome",
+          "minimum": 0
+        },
+        "informationGain": {
+          "type": "number",
+          "description": "How much we learned from this instance",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "modelUpdate": {
+          "type": "boolean",
+          "description": "Whether this should trigger model updates"
+        },
+        "confidenceAdjustment": {
+          "type": "number",
+          "description": "Suggested adjustment to future confidence",
+          "minimum": -1,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Confidence measurement metadata",
+      "required": ["framework", "model", "version", "features", "computationTime"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "description": "AI framework used",
+          "enum": ["mastra", "vercel-ai", "langchain", "openai-agents", "custom"]
+        },
+        "model": {
+          "type": "string",
+          "description": "AI model used",
+          "maxLength": 100
+        },
+        "version": {
+          "type": "string",
+          "description": "Schema version",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "features": {
+          "type": "array",
+          "description": "Features used for this prediction",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "maxItems": 20
+        },
+        "computationTime": {
+          "type": "number",
+          "description": "Time taken to compute (ms)",
+          "minimum": 0
+        },
+        "memoryUsage": {
+          "type": "number",
+          "description": "Memory used (MB)",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was last updated"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "agentId": "customer-support-agent-001",
+      "sessionId": "session_confidence_123",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "context": {
+        "task": "Classify customer sentiment from support ticket",
+        "taskType": "classification",
+        "domain": "customer_service",
+        "complexity": 0.6,
+        "novelty": 0.3,
+        "stakes": "high"
+      },
+      "confidence": {
+        "overall": 0.85,
+        "epistemic": 0.15,
+        "aleatoric": 0.10,
+        "calibrated": 0.82,
+        "aspects": {
+          "factualAccuracy": 0.90,
+          "completeness": 0.85,
+          "relevance": 0.95,
+          "clarity": 0.80,
+          "appropriateness": 0.88
+        },
+        "sources": {
+          "modelIntrinsic": 0.85,
+          "retrievalQuality": 0.75,
+          "contextRelevance": 0.90,
+          "historicalPerformance": 0.82,
+          "domainExpertise": 0.78
+        }
+      },
+      "prediction": {
+        "type": "multiclass",
+        "value": "frustrated",
+        "alternatives": [
+          {
+            "value": "angry",
+            "confidence": 0.65,
+            "reasoning": "Strong negative language but not extreme"
+          },
+          {
+            "value": "disappointed",
+            "confidence": 0.45,
+            "reasoning": "Some disappointment indicators present"
+          }
+        ],
+        "probability": 0.85,
+        "distribution": [
+          { "value": "frustrated", "probability": 0.85 },
+          { "value": "angry", "probability": 0.10 },
+          { "value": "disappointed", "probability": 0.05 }
+        ]
+      },
+      "temporal": {
+        "decayRate": 0.1,
+        "halfLife": 24,
+        "expiresAt": "2024-01-16T10:30:00Z",
+        "seasonality": "business_hours"
+      },
+      "learning": {
+        "surprisal": 0.2,
+        "informationGain": 0.15,
+        "modelUpdate": false,
+        "confidenceAdjustment": 0.02
+      },
+      "metadata": {
+        "framework": "mastra",
+        "model": "gpt-4",
+        "version": "1.0.0",
+        "features": ["text_analysis", "sentiment_keywords", "context_history"],
+        "computationTime": 150,
+        "memoryUsage": 25
+      }
+    }
+  ]
+}

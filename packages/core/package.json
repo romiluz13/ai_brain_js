@@ -1,0 +1,117 @@
+{
+  "name": "universal-ai-brain",
+  "version": "2.0.0",
+  "description": "🧠 Universal AI Brain 2.0 - The world's most comprehensive cognitive architecture for AI agents with 12 cognitive systems, MongoDB Atlas integration, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -w -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "dev": "tsc -w -p tsconfig.build.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "universal-ai-brain",
+    "ai-brain-2.0",
+    "cognitive-architecture",
+    "mongodb-atlas",
+    "ai-agents",
+    "vector-search",
+    "semantic-memory",
+    "emotional-intelligence",
+    "goal-hierarchy",
+    "confidence-tracking",
+    "attention-management",
+    "cultural-knowledge",
+    "skill-capability",
+    "communication-protocol",
+    "temporal-planning",
+    "mastra",
+    "vercel-ai",
+    "langchain",
+    "openai-agents",
+    "typescript",
+    "framework-agnostic",
+    "intelligence-layer",
+    "context-injection",
+    "self-improvement",
+    "safety-guardrails",
+    "workflow-tracking",
+    "performance-monitoring"
+  ],
+  "author": "Rom Iluz <rom@iluz.net>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/romiluz13/ai_brain_js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/romiluz13/ai_brain_js/issues"
+  },
+  "homepage": "https://github.com/romiluz13/ai_brain_js#readme",
+  "peerDependencies": {
+    "@mastra/core": ">=0.1.0",
+    "@ai-sdk/openai": ">=0.0.1",
+    "ai": ">=3.0.0",
+    "langchain": ">=0.1.0",
+    "@openai/agents": ">=0.0.9"
+  },
+  "peerDependenciesMeta": {
+    "@mastra/core": {
+      "optional": true
+    },
+    "@ai-sdk/openai": {
+      "optional": true
+    },
+    "ai": {
+      "optional": true
+    },
+    "langchain": {
+      "optional": true
+    },
+    "@openai/agents": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "mongodb": "^6.5.0",
+    "openai": "^4.0.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "pino": "^8.19.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^5.0.0",
+    "tsconfig": "*",
+    "eslint-config-custom": "*",
+    "mongodb-memory-server": "^9.1.6",
+    "@types/uuid": "^9.0.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

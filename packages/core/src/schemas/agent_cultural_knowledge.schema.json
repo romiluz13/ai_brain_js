@@ -1,0 +1,881 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_cultural_knowledge.schema.json",
+  "title": "Agent Cultural Knowledge Schema",
+  "description": "Schema for cultural knowledge and adaptation tracking with full-text search capabilities",
+  "type": "object",
+  "required": [
+    "agentId",
+    "timestamp",
+    "culture",
+    "knowledge",
+    "norms",
+    "adaptation",
+    "application",
+    "analytics",
+    "metadata"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Unique identifier for the agent",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Session identifier for cultural learning",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this cultural knowledge was recorded"
+    },
+    "culture": {
+      "type": "object",
+      "description": "Cultural identification and taxonomy",
+      "required": ["id", "name", "region", "country", "language"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "region": {
+          "type": "string",
+          "enum": ["north_america", "south_america", "europe", "africa", "asia", "east_asia", "southeast_asia", "south_asia", "middle_east", "oceania"]
+        },
+        "country": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "language": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "subculture": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "hierarchy": {
+          "type": "object",
+          "required": ["level", "parent", "children", "influences"],
+          "properties": {
+            "level": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "parent": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 20
+            },
+            "influences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "metadata": {
+          "type": "object",
+          "required": ["formality", "directness", "hierarchy", "collectivism", "uncertainty_avoidance", "time_orientation"],
+          "properties": {
+            "formality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "directness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "hierarchy": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "collectivism": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "uncertainty_avoidance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "time_orientation": {
+              "type": "string",
+              "enum": ["past", "present", "future", "cyclical"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "knowledge": {
+      "type": "object",
+      "description": "Cultural knowledge and insights",
+      "required": ["context", "business_insights", "social_dynamics", "linguistic"],
+      "properties": {
+        "context": {
+          "type": "object",
+          "required": ["key_values", "traditional_practices", "historical_context", "modern_adaptations"],
+          "properties": {
+            "key_values": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 10
+            },
+            "traditional_practices": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "maxItems": 15
+            },
+            "historical_context": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "modern_adaptations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "business_insights": {
+          "type": "object",
+          "required": ["work_culture", "decision_making", "relationship_building", "negotiation_style"],
+          "properties": {
+            "work_culture": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "maxItems": 10
+            },
+            "decision_making": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "relationship_building": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "negotiation_style": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        },
+        "social_dynamics": {
+          "type": "object",
+          "required": ["social_hierarchy", "group_dynamics", "conflict_resolution", "celebration_customs"],
+          "properties": {
+            "social_hierarchy": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "group_dynamics": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "conflict_resolution": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "celebration_customs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "linguistic": {
+          "type": "object",
+          "required": ["communication_styles", "non_verbal_cues", "taboo_topics", "preferred_channels"],
+          "properties": {
+            "communication_styles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 8
+            },
+            "non_verbal_cues": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 10
+            },
+            "taboo_topics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 15
+            },
+            "preferred_channels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["face_to_face", "email", "phone", "video_call", "messaging", "formal_letter"]
+              },
+              "maxItems": 6
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "norms": {
+      "type": "object",
+      "description": "Cultural norms and expectations",
+      "required": ["communication", "business", "social", "temporal"],
+      "properties": {
+        "communication": {
+          "type": "object",
+          "required": ["greeting_style", "formality_level", "directness_preference", "silence_interpretation"],
+          "properties": {
+            "greeting_style": {
+              "type": "string",
+              "enum": ["handshake", "bow", "hug", "kiss", "namaste", "wave", "nod"]
+            },
+            "formality_level": {
+              "type": "string",
+              "enum": ["very_formal", "formal", "semi_formal", "informal", "very_informal"]
+            },
+            "directness_preference": {
+              "type": "string",
+              "enum": ["very_direct", "direct", "moderate", "indirect", "very_indirect"]
+            },
+            "silence_interpretation": {
+              "type": "string",
+              "enum": ["comfortable", "respectful", "awkward", "negative", "contemplative"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "business": {
+          "type": "object",
+          "required": ["meeting_style", "decision_process", "hierarchy_respect", "punctuality_importance"],
+          "properties": {
+            "meeting_style": {
+              "type": "string",
+              "enum": ["structured", "flexible", "relationship_first", "task_focused", "consensus_building"]
+            },
+            "decision_process": {
+              "type": "string",
+              "enum": ["top_down", "consensus", "consultative", "democratic", "individual"]
+            },
+            "hierarchy_respect": {
+              "type": "string",
+              "enum": ["strict", "moderate", "flexible", "minimal", "egalitarian"]
+            },
+            "punctuality_importance": {
+              "type": "string",
+              "enum": ["critical", "important", "moderate", "flexible", "relaxed"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "social": {
+          "type": "object",
+          "required": ["personal_space", "eye_contact", "gift_giving", "dining_etiquette"],
+          "properties": {
+            "personal_space": {
+              "type": "string",
+              "enum": ["very_close", "close", "moderate", "distant", "very_distant"]
+            },
+            "eye_contact": {
+              "type": "string",
+              "enum": ["direct_expected", "moderate", "respectful_avoidance", "hierarchical", "gender_specific"]
+            },
+            "gift_giving": {
+              "type": "string",
+              "enum": ["common", "special_occasions", "business_appropriate", "personal_only", "avoided"]
+            },
+            "dining_etiquette": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "temporal": {
+          "type": "object",
+          "required": ["time_perception", "scheduling_flexibility", "deadline_approach", "planning_horizon"],
+          "properties": {
+            "time_perception": {
+              "type": "string",
+              "enum": ["monochronic", "polychronic", "cyclical", "event_based", "relationship_based"]
+            },
+            "scheduling_flexibility": {
+              "type": "string",
+              "enum": ["rigid", "structured", "moderate", "flexible", "very_flexible"]
+            },
+            "deadline_approach": {
+              "type": "string",
+              "enum": ["strict_adherence", "goal_oriented", "process_focused", "relationship_priority", "flexible"]
+            },
+            "planning_horizon": {
+              "type": "string",
+              "enum": ["short_term", "medium_term", "long_term", "generational", "adaptive"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "adaptation": {
+      "type": "object",
+      "description": "Cultural adaptation tracking",
+      "required": ["adaptation_level", "learning_progress", "sensitivity", "challenges"],
+      "properties": {
+        "adaptation_level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "learning_progress": {
+          "type": "object",
+          "required": ["milestones", "current_focus", "next_goals"],
+          "properties": {
+            "milestones": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["date", "achievement", "proficiency_gain"],
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "achievement": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "proficiency_gain": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "maxItems": 20
+            },
+            "current_focus": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 5
+            },
+            "next_goals": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 5
+            }
+          },
+          "additionalProperties": false
+        },
+        "sensitivity": {
+          "type": "object",
+          "required": ["cultural_awareness", "empathy_level", "bias_recognition", "inclusive_behavior"],
+          "properties": {
+            "cultural_awareness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "empathy_level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "bias_recognition": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "inclusive_behavior": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "challenges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["area", "difficulty", "improvement_strategy"],
+            "properties": {
+              "area": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "difficulty": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "improvement_strategy": {
+                "type": "string",
+                "maxLength": 300
+              }
+            }
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "application": {
+      "type": "object",
+      "description": "Cultural knowledge application",
+      "required": ["interactions", "outcomes", "feedback"],
+      "properties": {
+        "interactions": {
+          "type": "object",
+          "required": ["total_interactions", "successful_interactions", "challenging_interactions", "recent_contexts"],
+          "properties": {
+            "total_interactions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "successful_interactions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "challenging_interactions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "recent_contexts": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "outcomes": {
+          "type": "object",
+          "required": ["success_rate", "improvement_rate", "common_mistakes", "best_practices"],
+          "properties": {
+            "success_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "improvement_rate": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "common_mistakes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "maxItems": 10
+            },
+            "best_practices": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        },
+        "feedback": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "type", "content", "actionable"],
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": ["peer", "supervisor", "client", "self_reflection", "cultural_mentor"]
+              },
+              "type": {
+                "type": "string",
+                "enum": ["positive", "constructive", "corrective", "encouraging", "warning"]
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "actionable": {
+                "type": "boolean"
+              }
+            }
+          },
+          "maxItems": 20
+        }
+      },
+      "additionalProperties": false
+    },
+    "analytics": {
+      "type": "object",
+      "description": "Cultural knowledge analytics",
+      "required": ["trends", "benchmarks", "predictions", "insights"],
+      "properties": {
+        "trends": {
+          "type": "object",
+          "required": ["adaptation_trend", "success_trend", "learning_velocity", "cultural_fluency"],
+          "properties": {
+            "adaptation_trend": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "success_trend": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "learning_velocity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "cultural_fluency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "benchmarks": {
+          "type": "object",
+          "required": ["peer_comparison", "cultural_standard", "professional_requirement", "personal_goals"],
+          "properties": {
+            "peer_comparison": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "cultural_standard": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "professional_requirement": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "personal_goals": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "predictions": {
+          "type": "object",
+          "required": ["mastery_timeline", "challenge_areas", "growth_potential", "cultural_bridge_ability"],
+          "properties": {
+            "mastery_timeline": {
+              "type": "number",
+              "minimum": 0
+            },
+            "challenge_areas": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "maxItems": 5
+            },
+            "growth_potential": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "cultural_bridge_ability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "insights": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Cultural knowledge metadata",
+      "required": ["framework", "version", "data_source", "reliability", "last_updated"],
+      "properties": {
+        "framework": {
+          "type": "string",
+          "enum": ["mastra", "vercel-ai", "langchain", "openai-agents", "custom"]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "data_source": {
+          "type": "string",
+          "enum": ["interaction", "training", "research", "feedback", "observation"]
+        },
+        "reliability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this document was last updated"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "agentId": "customer-support-agent-001",
+      "sessionId": "session_cultural_123",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "culture": {
+        "id": "japanese_business",
+        "name": "Japanese Business Culture",
+        "region": "east_asia",
+        "country": "japan",
+        "language": "english",
+        "hierarchy": {
+          "level": 2,
+          "parent": "east_asian_cultures",
+          "children": ["tokyo_business", "osaka_business"],
+          "influences": ["confucian_values", "modern_corporate"]
+        },
+        "metadata": {
+          "formality": 0.9,
+          "directness": 0.3,
+          "hierarchy": 0.8,
+          "collectivism": 0.9,
+          "uncertainty_avoidance": 0.7,
+          "time_orientation": "future"
+        }
+      },
+      "knowledge": {
+        "context": {
+          "key_values": ["harmony", "respect", "group_consensus", "face_saving"],
+          "traditional_practices": ["bowing", "business_card_exchange", "group_decision_making"],
+          "historical_context": "Influenced by Confucian values and modern corporate culture",
+          "modern_adaptations": ["digital_communication", "international_business_practices"]
+        },
+        "business_insights": {
+          "work_culture": ["long_hours", "team_loyalty", "consensus_building"],
+          "decision_making": "Group consensus with hierarchical approval",
+          "relationship_building": "Essential for business success, built over time",
+          "negotiation_style": "Indirect, relationship-focused, patience required"
+        },
+        "social_dynamics": {
+          "social_hierarchy": "Age and position-based respect system",
+          "group_dynamics": "Harmony and consensus prioritized over individual opinions",
+          "conflict_resolution": "Indirect approach, face-saving important",
+          "celebration_customs": ["year_end_parties", "cherry_blossom_viewing"]
+        },
+        "linguistic": {
+          "communication_styles": ["indirect", "high_context", "respectful"],
+          "non_verbal_cues": ["bowing_depth", "business_card_handling", "silence_respect"],
+          "taboo_topics": ["personal_finances", "family_problems", "direct_criticism"],
+          "preferred_channels": ["face_to_face", "formal_email", "phone"]
+        }
+      },
+      "norms": {
+        "communication": {
+          "greeting_style": "bow",
+          "formality_level": "very_formal",
+          "directness_preference": "indirect",
+          "silence_interpretation": "respectful"
+        },
+        "business": {
+          "meeting_style": "structured",
+          "decision_process": "consensus",
+          "hierarchy_respect": "strict",
+          "punctuality_importance": "critical"
+        },
+        "social": {
+          "personal_space": "moderate",
+          "eye_contact": "respectful_avoidance",
+          "gift_giving": "business_appropriate",
+          "dining_etiquette": ["wait_for_host", "use_chopsticks_properly", "pour_for_others"]
+        },
+        "temporal": {
+          "time_perception": "monochronic",
+          "scheduling_flexibility": "structured",
+          "deadline_approach": "strict_adherence",
+          "planning_horizon": "long_term"
+        }
+      },
+      "adaptation": {
+        "adaptation_level": 0.7,
+        "learning_progress": {
+          "milestones": [
+            {
+              "date": "2024-01-10T00:00:00Z",
+              "achievement": "Learned proper business card exchange",
+              "proficiency_gain": 0.1
+            }
+          ],
+          "current_focus": ["meeting_etiquette", "indirect_communication"],
+          "next_goals": ["relationship_building", "consensus_participation"]
+        },
+        "sensitivity": {
+          "cultural_awareness": 0.8,
+          "empathy_level": 0.7,
+          "bias_recognition": 0.6,
+          "inclusive_behavior": 0.8
+        },
+        "challenges": [
+          {
+            "area": "indirect_communication",
+            "difficulty": 0.7,
+            "improvement_strategy": "Practice reading between the lines and asking clarifying questions"
+          }
+        ]
+      },
+      "application": {
+        "interactions": {
+          "total_interactions": 15,
+          "successful_interactions": 12,
+          "challenging_interactions": 3,
+          "recent_contexts": ["client_meeting", "team_collaboration", "presentation"]
+        },
+        "outcomes": {
+          "success_rate": 0.8,
+          "improvement_rate": 0.2,
+          "common_mistakes": ["too_direct_communication", "rushing_decisions"],
+          "best_practices": ["patient_listening", "respectful_questioning", "group_harmony"]
+        },
+        "feedback": [
+          {
+            "source": "client",
+            "type": "positive",
+            "content": "Appreciated the respectful approach and patience",
+            "actionable": true
+          }
+        ]
+      },
+      "analytics": {
+        "trends": {
+          "adaptation_trend": 0.3,
+          "success_trend": 0.2,
+          "learning_velocity": 0.4,
+          "cultural_fluency": 0.7
+        },
+        "benchmarks": {
+          "peer_comparison": 0.1,
+          "cultural_standard": -0.2,
+          "professional_requirement": 0.0,
+          "personal_goals": 0.3
+        },
+        "predictions": {
+          "mastery_timeline": 6,
+          "challenge_areas": ["indirect_communication", "group_consensus"],
+          "growth_potential": 0.8,
+          "cultural_bridge_ability": 0.6
+        },
+        "insights": [
+          "Strong progress in formal etiquette",
+          "Need more practice with indirect communication styles"
+        ]
+      },
+      "metadata": {
+        "framework": "mastra",
+        "version": "1.0.0",
+        "data_source": "interaction",
+        "reliability": 0.8,
+        "last_updated": "2024-01-15T10:30:00Z"
+      }
+    }
+  ]
+}
