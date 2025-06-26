@@ -40,6 +40,12 @@ import { SkillCapabilityManager } from './intelligence/SkillCapabilityManager';
 import { CommunicationProtocolManager } from './intelligence/CommunicationProtocolManager';
 import { TemporalPlanningEngine } from './intelligence/TemporalPlanningEngine';
 
+// Enhanced Cognitive Intelligence Layer (AI Brain 2.0 Enhancements)
+import { AdvancedToolInterface } from './intelligence/AdvancedToolInterface';
+import { WorkflowOrchestrationEngine } from './intelligence/WorkflowOrchestrationEngine';
+import { MultiModalProcessingEngine } from './intelligence/MultiModalProcessingEngine';
+import { HumanFeedbackIntegrationEngine } from './intelligence/HumanFeedbackIntegrationEngine';
+
 // Safety & Guardrails
 import { SafetyGuardrailsEngine } from './safety/SafetyGuardrailsEngine';
 import { HallucinationDetector } from './safety/HallucinationDetector';
@@ -57,45 +63,55 @@ import { SelfImprovementMetrics } from './self-improvement/SelfImprovementMetric
 import { PerformanceAnalyticsEngine } from './monitoring/PerformanceAnalyticsEngine';
 import { RealTimeMonitoringDashboard } from './monitoring/RealTimeMonitoringDashboard';
 
+// 🎯 SIMPLIFIED CONFIG FOR EASY SETUP
+export interface SimpleAIBrainConfig {
+  mongoUri?: string;
+  databaseName?: string;
+  apiKey?: string;
+  provider?: 'voyage' | 'openai';
+  mode?: 'demo' | 'basic' | 'production';
+}
+
+// 🔧 FULL CONFIG FOR ADVANCED USERS (BACKWARD COMPATIBILITY)
 export interface UniversalAIBrainConfig {
-  mongodb: {
+  mongodb?: {
     connectionString: string;
-    databaseName: string;
-    collections: {
-      tracing: string;
-      memory: string;
-      context: string;
-      metrics: string;
-      audit: string;
+    databaseName?: string;
+    collections?: {
+      tracing?: string;
+      memory?: string;
+      context?: string;
+      metrics?: string;
+      audit?: string;
     };
   };
-  intelligence: {
-    embeddingModel: string;
-    vectorDimensions: number;
-    similarityThreshold: number;
-    maxContextLength: number;
+  intelligence?: {
+    embeddingModel?: string;
+    vectorDimensions?: number;
+    similarityThreshold?: number;
+    maxContextLength?: number;
   };
-  safety: {
-    enableContentFiltering: boolean;
-    enablePIIDetection: boolean;
-    enableHallucinationDetection: boolean;
-    enableComplianceLogging: boolean;
-    safetyLevel: 'strict' | 'moderate' | 'permissive';
+  safety?: {
+    enableContentFiltering?: boolean;
+    enablePIIDetection?: boolean;
+    enableHallucinationDetection?: boolean;
+    enableComplianceLogging?: boolean;
+    safetyLevel?: 'strict' | 'moderate' | 'permissive';
   };
-  monitoring: {
-    enableRealTimeMonitoring: boolean;
-    enablePerformanceTracking: boolean;
-    enableCostTracking: boolean;
-    enableErrorTracking: boolean;
+  monitoring?: {
+    enableRealTimeMonitoring?: boolean;
+    enablePerformanceTracking?: boolean;
+    enableCostTracking?: boolean;
+    enableErrorTracking?: boolean;
     metricsRetentionDays?: number;
     alertingEnabled?: boolean;
     dashboardRefreshInterval?: number;
   };
   selfImprovement?: {
-    enableAutomaticOptimization: boolean;
-    learningRate: number;
-    optimizationInterval: number;
-    feedbackLoopEnabled: boolean;
+    enableAutomaticOptimization?: boolean;
+    learningRate?: number;
+    optimizationInterval?: number;
+    feedbackLoopEnabled?: boolean;
   };
   apis?: {
     openai?: {
@@ -107,6 +123,12 @@ export interface UniversalAIBrainConfig {
       baseURL?: string;
     };
   };
+  // 🚀 NEW: Support for simple config
+  mongoUri?: string;
+  databaseName?: string;
+  apiKey?: string;
+  provider?: 'voyage' | 'openai';
+  mode?: 'demo' | 'basic' | 'production';
 }
 
 export interface AIBrainResponse {
@@ -123,9 +145,53 @@ export interface AIBrainResponse {
   };
 }
 
+// 🛡️ 2025 TYPESCRIPT ERROR HANDLING UTILITY
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+}
+
+// 🎯 SMART DEFAULTS FOR EASY SETUP
+const DEFAULT_CONFIG = {
+  intelligence: {
+    embeddingModel: 'voyage-large-2-instruct',
+    vectorDimensions: 1024,
+    similarityThreshold: 0.7,
+    maxContextLength: 4000
+  },
+  safety: {
+    enableContentFiltering: true,
+    enablePIIDetection: true,
+    enableHallucinationDetection: true,
+    enableComplianceLogging: true,
+    safetyLevel: 'moderate' as const
+  },
+  monitoring: {
+    enableRealTimeMonitoring: true,
+    enablePerformanceTracking: true,
+    enableCostTracking: true,
+    enableErrorTracking: true,
+    metricsRetentionDays: 30,
+    alertingEnabled: false,
+    dashboardRefreshInterval: 5000
+  },
+  collections: {
+    tracing: 'agent_traces',
+    memory: 'agent_memory',
+    context: 'agent_context',
+    metrics: 'agent_metrics',
+    audit: 'agent_safety_logs'
+  }
+};
+
 /**
  * UniversalAIBrain - The central orchestrator for AI intelligence
- * 
+ *
  * Provides a unified interface for any TypeScript framework to integrate
  * with MongoDB-powered AI intelligence, safety systems, and self-improvement.
  */
@@ -159,6 +225,12 @@ export class UniversalAIBrain {
   private communicationProtocolManager!: CommunicationProtocolManager;
   private temporalPlanningEngine!: TemporalPlanningEngine;
 
+  // Enhanced Cognitive Intelligence Layer (AI Brain 2.0 Enhancements)
+  private _advancedToolInterface!: AdvancedToolInterface;
+  private _workflowOrchestrationEngine!: WorkflowOrchestrationEngine;
+  private _multiModalProcessingEngine!: MultiModalProcessingEngine;
+  private _humanFeedbackIntegrationEngine!: HumanFeedbackIntegrationEngine;
+
   // Safety & Guardrails
   private safetyEngine!: SafetyGuardrailsEngine;
   private hallucinationDetector!: HallucinationDetector;
@@ -176,10 +248,172 @@ export class UniversalAIBrain {
   private performanceAnalyticsEngine!: PerformanceAnalyticsEngine;
   private realTimeMonitoringDashboard!: RealTimeMonitoringDashboard;
 
-  constructor(config: UniversalAIBrainConfig) {
-    this.config = config;
-    this.mongoClient = new MongoClient(config.mongodb.connectionString);
+  constructor(config: UniversalAIBrainConfig | SimpleAIBrainConfig) {
+    this.config = this.buildFullConfig(config);
+    this.mongoClient = new MongoClient(this.config.mongodb!.connectionString);
     this.mongoConnection = this.mongoClient; // Initialize mongoConnection
+  }
+
+  // 🚀 MAGICAL STATIC FACTORY METHODS FOR EASY SETUP
+
+  /**
+   * 🎯 DEMO MODE - Try AI Brain without any external dependencies
+   */
+  static demo(): UniversalAIBrain {
+    console.log('🎭 Demo Mode: Using in-memory storage (no MongoDB required)');
+    return new UniversalAIBrain({
+      mode: 'demo',
+      mongoUri: 'mongodb://localhost:27017', // Will be mocked
+      databaseName: 'demo_ai_brain',
+      apiKey: 'demo-key'
+    });
+  }
+
+  /**
+   * ⚡ BASIC SETUP - Minimal configuration with smart defaults
+   */
+  static basic(config: { mongoUri: string; apiKey: string; databaseName?: string }): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'basic',
+      mongoUri: config.mongoUri,
+      apiKey: config.apiKey,
+      databaseName: config.databaseName
+    });
+  }
+
+  /**
+   * 🎯 AUTO SETUP - Detect everything from environment variables
+   */
+  static auto(): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'production'
+    });
+  }
+
+  /**
+   * 🔧 FOR MASTRA - Optimized for Mastra framework
+   */
+  static forMastra(config?: { mongoUri?: string; apiKey?: string }): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'production',
+      mongoUri: config?.mongoUri,
+      apiKey: config?.apiKey,
+      databaseName: 'ai_brain_mastra',
+      provider: 'voyage' // Mastra works great with Voyage
+    });
+  }
+
+  /**
+   * ⚡ FOR VERCEL AI - Optimized for Vercel AI SDK
+   */
+  static forVercelAI(config?: { mongoUri?: string; apiKey?: string }): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'production',
+      mongoUri: config?.mongoUri,
+      apiKey: config?.apiKey,
+      databaseName: 'ai_brain_vercel',
+      provider: 'openai' // Vercel AI works great with OpenAI
+    });
+  }
+
+  /**
+   * 🦜 FOR LANGCHAIN - Optimized for LangChain.js
+   */
+  static forLangChain(config?: { mongoUri?: string; apiKey?: string }): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'production',
+      mongoUri: config?.mongoUri,
+      apiKey: config?.apiKey,
+      databaseName: 'ai_brain_langchain',
+      provider: 'openai' // LangChain works great with OpenAI
+    });
+  }
+
+  /**
+   * 🎯 SMART CONFIG BUILDER - Converts simple config to full config with defaults
+   */
+  private buildFullConfig(input: UniversalAIBrainConfig | SimpleAIBrainConfig): UniversalAIBrainConfig {
+    // If it's already a full config, merge with defaults
+    if ('mongodb' in input && input.mongodb) {
+      return this.mergeWithDefaults(input as UniversalAIBrainConfig);
+    }
+
+    // Convert simple config to full config
+    const simple = input as SimpleAIBrainConfig;
+
+    // Auto-detect from environment variables
+    const mongoUri = simple.mongoUri ||
+                    process.env.MONGODB_CONNECTION_STRING ||
+                    process.env.MONGODB_URI ||
+                    process.env.MONGO_URI;
+
+    const apiKey = simple.apiKey ||
+                  process.env.VOYAGE_API_KEY ||
+                  process.env.OPENAI_API_KEY;
+
+    const provider = simple.provider ||
+                    (process.env.VOYAGE_API_KEY ? 'voyage' : 'openai');
+
+    if (!mongoUri) {
+      throw new Error('🚨 MongoDB connection string required! Set MONGODB_CONNECTION_STRING env var or pass mongoUri');
+    }
+
+    if (!apiKey && simple.mode !== 'demo') {
+      throw new Error('🚨 API key required! Set VOYAGE_API_KEY or OPENAI_API_KEY env var or pass apiKey');
+    }
+
+    const databaseName = simple.databaseName || `ai_brain_${Date.now()}`;
+
+    return {
+      mongodb: {
+        connectionString: mongoUri,
+        databaseName,
+        collections: DEFAULT_CONFIG.collections
+      },
+      intelligence: {
+        ...DEFAULT_CONFIG.intelligence,
+        embeddingModel: provider === 'voyage' ? 'voyage-large-2-instruct' : 'text-embedding-3-small',
+        vectorDimensions: provider === 'voyage' ? 1024 : 1536
+      },
+      safety: DEFAULT_CONFIG.safety,
+      monitoring: DEFAULT_CONFIG.monitoring,
+      apis: apiKey ? {
+        [provider]: {
+          apiKey,
+          baseURL: provider === 'voyage' ? 'https://api.voyageai.com/v1' : 'https://api.openai.com/v1'
+        }
+      } : undefined
+    };
+  }
+
+  /**
+   * 🔧 MERGE FULL CONFIG WITH DEFAULTS
+   */
+  private mergeWithDefaults(config: UniversalAIBrainConfig): UniversalAIBrainConfig {
+    return {
+      mongodb: {
+        connectionString: config.mongodb?.connectionString || config.mongoUri || process.env.MONGODB_CONNECTION_STRING!,
+        databaseName: config.mongodb?.databaseName || config.databaseName || `ai_brain_${Date.now()}`,
+        collections: {
+          ...DEFAULT_CONFIG.collections,
+          ...config.mongodb?.collections
+        }
+      },
+      intelligence: {
+        ...DEFAULT_CONFIG.intelligence,
+        ...config.intelligence
+      },
+      safety: {
+        ...DEFAULT_CONFIG.safety,
+        ...config.safety
+      },
+      monitoring: {
+        ...DEFAULT_CONFIG.monitoring,
+        ...config.monitoring
+      },
+      selfImprovement: config.selfImprovement,
+      apis: config.apis
+    };
   }
 
   /**
@@ -193,7 +427,7 @@ export class UniversalAIBrain {
     try {
       // Connect to MongoDB
       await this.mongoClient.connect();
-      this.database = this.mongoClient.db(this.config.mongodb.databaseName);
+      this.database = this.mongoClient.db(this.config.mongodb!.databaseName!);
 
       // Initialize core collections
       await this.initializeCollections();
@@ -211,7 +445,7 @@ export class UniversalAIBrain {
       await this.initializeMonitoringSystems();
 
       // Start real-time monitoring if enabled
-      if (this.config.monitoring.enableRealTimeMonitoring) {
+      if (this.config.monitoring?.enableRealTimeMonitoring) {
         await this.realTimeMonitoringDashboard.startMonitoring();
       }
 
@@ -267,7 +501,7 @@ export class UniversalAIBrain {
 
       const createdMemory = await this.memoryCollection.createMemory(memoryDoc);
       console.log(`💾 Memory stored: ${createdMemory._id}`);
-      return createdMemory._id.toString();
+      return createdMemory._id?.toString() || '';
     } catch (error) {
       console.error('Failed to store memory:', error);
       throw error;
@@ -451,7 +685,7 @@ export class UniversalAIBrain {
         inputValidation.filteredContent || input,
         {
           limit: 10,
-          minScore: this.config.intelligence.similarityThreshold,
+          minScore: this.config.intelligence?.similarityThreshold || 0.7,
           includeExplanation: true
         }
       );
@@ -503,7 +737,7 @@ export class UniversalAIBrain {
       });
 
       // 7. Trigger self-improvement if enabled
-      if (this.config.selfImprovement.enableAutomaticOptimization) {
+      if (this.config.selfImprovement?.enableAutomaticOptimization) {
         await this.triggerSelfImprovement(framework, traceId);
       }
 
@@ -564,7 +798,7 @@ export class UniversalAIBrain {
 
     try {
       // Stop monitoring
-      if (this.config.monitoring.enableRealTimeMonitoring) {
+      if (this.config.monitoring?.enableRealTimeMonitoring) {
         await this.realTimeMonitoringDashboard.stopMonitoring();
       }
 
@@ -621,11 +855,11 @@ export class UniversalAIBrain {
     const embeddingProvider = voyageApiKey && !isTestMode
       ? new VoyageAIEmbeddingProvider({
           apiKey: voyageApiKey,
-          model: this.config.intelligence.embeddingModel || 'voyage-large-2-instruct'
+          model: this.config.intelligence?.embeddingModel || 'voyage-large-2-instruct'
         })
       : new OpenAIEmbeddingProvider({
           apiKey: openaiApiKey || 'test-key-for-testing',
-          model: this.config.intelligence.embeddingModel || 'text-embedding-3-small'
+          model: this.config.intelligence?.embeddingModel || 'text-embedding-3-small'
         });
 
     this.semanticMemoryEngine = new SemanticMemoryEngine(this.memoryCollection, embeddingProvider);
@@ -659,6 +893,19 @@ export class UniversalAIBrain {
 
     this.temporalPlanningEngine = new TemporalPlanningEngine(this.database);
     await this.temporalPlanningEngine.initialize();
+
+    // Initialize enhanced cognitive intelligence engines (AI Brain 2.0 Enhancements)
+    this._advancedToolInterface = new AdvancedToolInterface(this.database);
+    await this._advancedToolInterface.initialize();
+
+    this._workflowOrchestrationEngine = new WorkflowOrchestrationEngine(this.database);
+    await this._workflowOrchestrationEngine.initialize();
+
+    this._multiModalProcessingEngine = new MultiModalProcessingEngine(this.database);
+    await this._multiModalProcessingEngine.initialize();
+
+    this._humanFeedbackIntegrationEngine = new HumanFeedbackIntegrationEngine(this.database);
+    await this._humanFeedbackIntegrationEngine.initialize();
   }
 
   private async initializeSafetySystems(): Promise<void> {
@@ -707,12 +954,12 @@ export class UniversalAIBrain {
       this.tracingCollection,
       this.memoryCollection,
       {
-        refreshInterval: this.config.monitoring.dashboardRefreshInterval,
+        refreshInterval: this.config.monitoring?.dashboardRefreshInterval || 5000,
         displayOptions: {
           showHistoricalData: true,
           timeRange: '24h',
-          autoRefresh: this.config.monitoring.enableRealTimeMonitoring,
-          enableNotifications: this.config.monitoring.alertingEnabled
+          autoRefresh: this.config.monitoring?.enableRealTimeMonitoring || false,
+          enableNotifications: this.config.monitoring?.alertingEnabled || false
         }
       }
     );
@@ -843,5 +1090,104 @@ export class UniversalAIBrain {
    */
   get db() {
     return this.database;
+  }
+
+  // ============================================================================
+  // COGNITIVE SYSTEM ACCESS (for testing and advanced usage)
+  // ============================================================================
+
+  /**
+   * Access to Emotional Intelligence Engine
+   */
+  get emotionalIntelligence() {
+    return this.emotionalIntelligenceEngine;
+  }
+
+  /**
+   * Access to Goal Hierarchy Manager
+   */
+  get goalHierarchy() {
+    return this.goalHierarchyManager;
+  }
+
+  /**
+   * Access to Confidence Tracking Engine
+   */
+  get confidenceTracking() {
+    return this.confidenceTrackingEngine;
+  }
+
+  /**
+   * Access to Attention Management System
+   */
+  get attentionManagement() {
+    return this.attentionManagementSystem;
+  }
+
+  /**
+   * Access to Cultural Knowledge Engine
+   */
+  get culturalKnowledge() {
+    return this.culturalKnowledgeEngine;
+  }
+
+  /**
+   * Access to Skill Capability Manager
+   */
+  get skillCapability() {
+    return this.skillCapabilityManager;
+  }
+
+  /**
+   * Access to Communication Protocol Manager
+   */
+  get communicationProtocol() {
+    return this.communicationProtocolManager;
+  }
+
+  /**
+   * Access to Temporal Planning Engine
+   */
+  get temporalPlanning() {
+    return this.temporalPlanningEngine;
+  }
+
+  // ============================================================================
+  // ENHANCED COGNITIVE SYSTEM ACCESS (AI Brain 2.0 Enhancements)
+  // ============================================================================
+
+  /**
+   * Access to Advanced Tool Interface
+   */
+  get advancedToolInterface() {
+    return this._advancedToolInterface;
+  }
+
+  /**
+   * Access to Workflow Orchestration Engine
+   */
+  get workflowOrchestration() {
+    return this._workflowOrchestrationEngine;
+  }
+
+  /**
+   * Access to Multi-Modal Processing Engine
+   */
+  get multiModalProcessing() {
+    return this._multiModalProcessingEngine;
+  }
+
+  /**
+   * Access to Human Feedback Integration Engine
+   */
+  get humanFeedbackIntegration() {
+    return this._humanFeedbackIntegrationEngine;
+  }
+
+  /**
+   * 🎯 Access to Configuration (for testing and debugging)
+   */
+  get configuration() {
+    return this.config;
   }
 }

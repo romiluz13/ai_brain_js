@@ -1,0 +1,31 @@
+{
+  "name": "universal-ai-brain-mastra-test",
+  "version": "2.0.0",
+  "description": "Real-world Mastra agent test for Universal AI Brain 2.0",
+  "type": "module",
+  "main": "test-ai-brain-real.ts",
+  "scripts": {
+    "test": "tsx test-ai-brain-real.ts",
+    "dev": "mastra dev",
+    "build": "mastra build"
+  },
+  "dependencies": {
+    "@mastra/core": "latest",
+    "@ai-sdk/openai": "latest",
+    "zod": "^3.22.4",
+    "dotenv": "^16.3.1",
+    "tsx": "^4.7.0",
+    "mongodb": "^6.3.0"
+  },
+  "keywords": [
+    "ai",
+    "brain",
+    "mastra",
+    "mongodb",
+    "vector-search",
+    "cognitive-systems",
+    "real-world-test"
+  ],
+  "author": "Universal AI Brain Team",
+  "license": "MIT"
+}

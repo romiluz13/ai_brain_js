@@ -567,7 +567,9 @@ export class ContextInjectionEngine {
   private setCache(key: string, context: ContextItem[]): void {
     if (this.contextCache.size >= this.cacheSize) {
       const firstKey = this.contextCache.keys().next().value;
-      this.contextCache.delete(firstKey);
+      if (firstKey) {
+        this.contextCache.delete(firstKey);
+      }
     }
     this.contextCache.set(key, context);
   }

@@ -71,7 +71,8 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
       return embeddings[0];
     } catch (error) {
       console.error('Error generating embedding:', error);
-      throw new Error(`Failed to generate embedding: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to generate embedding: ${errorMessage}`);
     }
   }
 
@@ -98,7 +99,8 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
       return this.callEmbeddingAPI(validTexts);
     } catch (error) {
       console.error('Error generating embeddings:', error);
-      throw new Error(`Failed to generate embeddings: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to generate embeddings: ${errorMessage}`);
     }
   }
 
@@ -182,7 +184,7 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
           throw new Error(`API request failed: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
         }
 
-        const data: EmbeddingResponse = await response.json();
+        const data = await response.json() as EmbeddingResponse;
         
         // Update usage statistics
         this.requestCount++;
@@ -199,7 +201,8 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
         
         if (attempt < this.config.maxRetries) {
           const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-          console.warn(`Embedding API attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.warn(`Embedding API attempt ${attempt + 1} failed, retrying in ${delay}ms:`, errorMessage);
           await this.sleep(delay);
         }
       }
@@ -301,7 +304,7 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
     } catch (error) {
       return {
         success: false,
-        details: { error: error.message }
+        details: { error: error instanceof Error ? error.message : String(error) }
       };
     }
   }

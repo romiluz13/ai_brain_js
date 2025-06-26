@@ -245,7 +245,8 @@ export class VectorSearchEngine {
       return await this.embeddingProvider.generateEmbedding(text);
     } catch (error) {
       console.error('Failed to create embedding:', error);
-      throw new Error(`Embedding generation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Embedding generation failed: ${errorMessage}`);
     }
   }
 
@@ -290,7 +291,8 @@ export class VectorSearchEngine {
       return document._id;
     } catch (error) {
       console.error('Failed to store document:', error);
-      throw new Error(`Document storage failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Document storage failed: ${errorMessage}`);
     }
   }
 
@@ -650,7 +652,9 @@ export class VectorSearchEngine {
   private setCache(key: string, results: SearchResult[]): void {
     if (this.searchCache.size >= this.cacheSize) {
       const firstKey = this.searchCache.keys().next().value;
-      this.searchCache.delete(firstKey);
+      if (firstKey) {
+        this.searchCache.delete(firstKey);
+      }
     }
     this.searchCache.set(key, { results, timestamp: Date.now() });
   }

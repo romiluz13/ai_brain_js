@@ -1,0 +1,40 @@
+{
+  "name": "universal-ai-brain-mastra-test",
+  "version": "2.0.0",
+  "description": "Comprehensive test agent for Universal AI Brain 2.0 using Mastra framework",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "test": "tsx run-test.ts",
+    "test:quick": "tsx run-test.ts quick",
+    "test:demo": "tsx run-test.ts demo",
+    "dev": "mastra dev",
+    "build": "tsc"
+  },
+  "keywords": [
+    "ai",
+    "brain",
+    "mongodb",
+    "vector-search",
+    "hybrid-search",
+    "mastra",
+    "cognitive-systems",
+    "safety-guardrails"
+  ],
+  "author": "Universal AI Brain Team",
+  "license": "MIT",
+  "dependencies": {
+    "@mastra/core": "latest",
+    "@ai-sdk/openai": "latest",
+    "zod": "^3.22.4",
+    "dotenv": "^16.3.1",
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

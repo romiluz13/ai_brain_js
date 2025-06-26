@@ -77,7 +77,8 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
       return embeddings[0];
     } catch (error) {
       console.error('Error generating Voyage AI embedding:', error);
-      throw new Error(`Failed to generate Voyage AI embedding: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to generate Voyage AI embedding: ${errorMessage}`);
     }
   }
 
@@ -104,7 +105,8 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
       return this.callVoyageAPI(validTexts);
     } catch (error) {
       console.error('Error generating Voyage AI embeddings:', error);
-      throw new Error(`Failed to generate Voyage AI embeddings: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to generate Voyage AI embeddings: ${errorMessage}`);
     }
   }
 
@@ -173,7 +175,7 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
    * Call Voyage AI API with retry logic
    */
   private async callVoyageAPI(texts: string[]): Promise<number[][]> {
-    let lastError: Error;
+    let lastError: Error = new Error('Unknown error occurred');
 
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
       try {
@@ -184,7 +186,7 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
 
         return response.data.map(item => item.embedding);
       } catch (error) {
-        lastError = error;
+        lastError = error instanceof Error ? error : new Error(String(error));
         
         if (attempt === this.config.maxRetries) {
           break;
@@ -241,16 +243,16 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as any;
         throw new Error(`Voyage AI API error: ${response.status} - ${errorData.message || response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as VoyageEmbeddingResponse;
       return data;
     } catch (error) {
       clearTimeout(timeoutId);
       
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error(`Voyage AI API request timeout after ${this.config.timeout}ms`);
       }
       

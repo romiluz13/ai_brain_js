@@ -101,8 +101,9 @@ export class HybridSearchEngine {
       // Build filter conditions
       const filterConditions = this.buildFilterConditions(filters);
 
-      // Execute hybrid search pipeline
-      const results = await this.executeHybridSearchPipeline(
+      // Execute hybrid search using MongoDB's native $rankFusion (2025 feature)
+      // Falls back to manual approach if $rankFusion is not available
+      const results = await this.executeHybridSearchWithRankFusion(
         query,
         queryEmbedding,
         filterConditions,
@@ -228,6 +229,131 @@ export class HybridSearchEngine {
       },
       relevance_explanation: doc.relevance_explanation || 'No explanation available'
     }));
+  }
+
+  /**
+   * Execute hybrid search using MongoDB's native $rankFusion (2025 feature)
+   * This replaces manual reciprocal rank fusion with MongoDB's optimized implementation
+   */
+  private async executeHybridSearchWithRankFusion(
+    query: string,
+    queryEmbedding: number[],
+    filterConditions: Record<string, any>,
+    options: Required<SearchOptions>
+  ): Promise<HybridSearchResult[]> {
+    const collection = this.db.collection('vector_embeddings');
+
+    try {
+      // MongoDB $rankFusion syntax based on 2025 documentation
+      const pipeline: any[] = [
+        {
+          $rankFusion: {
+            input: {
+              pipelines: [
+                // Pipeline 1: Vector search
+                [
+                  {
+                    $vectorSearch: {
+                      index: options.vector_index,
+                      queryVector: queryEmbedding,
+                      path: 'embedding.values',
+                      numCandidates: Math.max(options.limit * 10, 150),
+                      limit: Math.max(options.limit * 2, 50),
+                      filter: filterConditions,
+                    },
+                  },
+                  {
+                    $addFields: {
+                      vector_score: { $meta: 'vectorSearchScore' },
+                    },
+                  },
+                ],
+                // Pipeline 2: Text search
+                [
+                  {
+                    $search: {
+                      index: options.text_index,
+                      compound: {
+                        must: [
+                          {
+                            text: {
+                              query: query,
+                              path: ['content.text', 'content.summary'],
+                            },
+                          },
+                        ],
+                        filter: Object.keys(filterConditions).length > 0 ? [filterConditions] : [],
+                      },
+                    },
+                  },
+                  {
+                    $addFields: {
+                      text_score: { $meta: 'searchScore' },
+                    },
+                  },
+                ],
+              ],
+              // Apply weights for reciprocal rank fusion
+              weights: [options.vector_weight, options.text_weight],
+            },
+          },
+        },
+        // Add combined score for compatibility
+        {
+          $addFields: {
+            combined_score: {
+              $add: [
+                { $multiply: ['$vector_score', options.vector_weight] },
+                { $multiply: ['$text_score', options.text_weight] },
+              ],
+            },
+          },
+        },
+        // Limit results
+        { $limit: options.limit },
+        // Project final results
+        {
+          $project: {
+            _id: 1,
+            embedding_id: 1,
+            content: 1,
+            metadata: 1,
+            vector_score: 1,
+            text_score: 1,
+            combined_score: 1,
+            ...(options.include_embeddings && { 'embedding.values': 1 }),
+            ...(options.explain_relevance && {
+              relevance_explanation: {
+                $concat: [
+                  'RankFusion - Vector: ', { $toString: { $round: ['$vector_score', 3] } },
+                  ', Text: ', { $toString: { $round: ['$text_score', 3] } },
+                  ', Combined: ', { $toString: { $round: ['$combined_score', 3] } }
+                ]
+              }
+            })
+          },
+        },
+      ];
+
+      const results = await collection.aggregate(pipeline).toArray();
+
+      return results.map(doc => ({
+        _id: doc._id.toString(),
+        embedding_id: doc.embedding_id,
+        content: doc.content,
+        metadata: doc.metadata,
+        scores: {
+          vector_score: doc.vector_score || 0,
+          text_score: doc.text_score || 0,
+          combined_score: doc.combined_score || 0,
+        },
+        relevance_explanation: doc.relevance_explanation || 'RankFusion hybrid search result'
+      }));
+    } catch (error) {
+      console.error('RankFusion hybrid search failed, falling back to manual approach:', error);
+      // Fallback to the existing manual approach
+      return await this.executeHybridSearchPipeline(query, queryEmbedding, filterConditions, options);
+    }
   }
 
   /**

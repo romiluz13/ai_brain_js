@@ -135,7 +135,7 @@ export class MongoVectorStore {
       return result.insertedId.toString();
     } catch (error) {
       console.error('Error storing document:', error);
-      throw new Error(`Failed to store document: ${error.message}`);
+      throw new Error(`Failed to store document: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -171,7 +171,7 @@ export class MongoVectorStore {
       return Object.values(result.insertedIds).map(id => id.toString());
     } catch (error) {
       console.error('Error storing documents:', error);
-      throw new Error(`Failed to store documents: ${error.message}`);
+      throw new Error(`Failed to store documents: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -237,7 +237,7 @@ export class MongoVectorStore {
       return results;
     } catch (error) {
       console.error('Error in vector search:', error);
-      throw new Error(`Vector search failed: ${error.message}`);
+      throw new Error(`Vector search failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -336,7 +336,7 @@ export class MongoVectorStore {
       const results = await this.collection.aggregate<VectorSearchResult>(pipeline).toArray();
       return results;
     } catch (error) {
-      console.warn('Text search failed, this is normal if text index is not created:', error.message);
+      console.warn('Text search failed, this is normal if text index is not created:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -367,7 +367,7 @@ export class MongoVectorStore {
       });
     } catch (error) {
       console.error('Error finding similar documents:', error);
-      throw new Error(`Failed to find similar documents: ${error.message}`);
+      throw new Error(`Failed to find similar documents: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -412,7 +412,7 @@ export class MongoVectorStore {
 
       console.log('✅ MongoDB indexes created successfully');
     } catch (error) {
-      console.warn('⚠️ Some indexes may already exist:', error.message);
+      console.warn('⚠️ Some indexes may already exist:', error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -472,7 +472,7 @@ export class MongoVectorStore {
       };
     } catch (error) {
       console.error('Error getting vector store stats:', error);
-      return { error: error.message };
+      return { error: error instanceof Error ? error.message : String(error) };
     }
   }
 
@@ -485,7 +485,7 @@ export class MongoVectorStore {
       return result.deletedCount;
     } catch (error) {
       console.error('Error deleting documents:', error);
-      throw new Error(`Failed to delete documents: ${error.message}`);
+      throw new Error(`Failed to delete documents: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -511,7 +511,7 @@ export class MongoVectorStore {
       return result.modifiedCount > 0;
     } catch (error) {
       console.error('Error updating document metadata:', error);
-      throw new Error(`Failed to update document: ${error.message}`);
+      throw new Error(`Failed to update document: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -548,7 +548,7 @@ export class MongoVectorStore {
         .toArray();
     } catch (error) {
       console.error('Error searching by metadata:', error);
-      throw new Error(`Failed to search by metadata: ${error.message}`);
+      throw new Error(`Failed to search by metadata: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -607,7 +607,7 @@ export class MongoVectorStore {
     } catch (error) {
       return {
         isHealthy: false,
-        details: { error: error.message }
+        details: { error: error instanceof Error ? error.message : String(error) }
       };
     }
   }

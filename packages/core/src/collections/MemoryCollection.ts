@@ -70,7 +70,7 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
     };
 
     const memory = await this.createMemory(memoryData);
-    return memory._id.toString();
+    return memory._id?.toString() || '';
   }
 
   /**
@@ -405,11 +405,11 @@ export class MemoryCollection extends BaseCollection<AgentMemory> {
 
     return {
       total: result.total[0]?.count || 0,
-      byType: result.byType.reduce((acc, item) => {
+      byType: result.byType.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;
         return acc;
       }, {}),
-      byImportance: result.byImportance.reduce((acc, item) => {
+      byImportance: result.byImportance.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;
         return acc;
       }, {}),

@@ -504,7 +504,7 @@ export class SemanticMemoryEngine {
     // Simple LRU cache implementation
     if (this.memoryCache.size >= this.cacheSize) {
       const firstKey = this.memoryCache.keys().next().value;
-      this.memoryCache.delete(firstKey);
+      if (firstKey) this.memoryCache.delete(firstKey);
     }
     this.memoryCache.set(memory.id, memory);
   }

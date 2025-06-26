@@ -380,7 +380,7 @@ export class TracingCollection extends BaseCollection<AgentTrace> {
         'operation.finalOutput': completion.finalOutput,
         'operation.outputType': completion.outputType,
         updatedAt: new Date()
-      },
+      } as any,
       $push: {},
       $inc: {}
     };
