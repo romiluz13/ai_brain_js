@@ -1,3 +1,25 @@
+/**
+ * 🚀 MONGODB ATLAS HYBRID SEARCH ENGINE
+ *
+ * ✅ PERFECTLY ALIGNED with MongoDB Atlas 2025 Documentation
+ * ✅ Uses $rankFusion with reciprocal rank fusion (MongoDB 8.1+)
+ * ✅ Automatic fallback for older MongoDB versions
+ * ✅ Supports both vector and full-text search with optimal weighting
+ *
+ * Key Features:
+ * - Native MongoDB $rankFusion implementation
+ * - Reciprocal rank fusion with rank_constant = 60 (MongoDB default)
+ * - Named pipeline structure: vectorPipeline + fullTextPipeline
+ * - Proper combination.weights syntax
+ * - MongoDB version detection and compatibility
+ * - Production-ready with Voyage AI and OpenAI embedding providers
+ *
+ * MongoDB Requirements:
+ * - MongoDB Atlas 8.1+ for $rankFusion support
+ * - Vector Search Index on embedding.values field
+ * - Atlas Search Index on content.text and content.summary fields
+ */
+
 import { Collection, Db, Document } from 'mongodb';
 import { MongoEmbeddingProvider } from '../persistance/MongoEmbeddingProvider';
 import { OpenAIEmbeddingProvider } from '../embeddings/OpenAIEmbeddingProvider';
@@ -101,22 +123,45 @@ export class HybridSearchEngine {
       // Build filter conditions
       const filterConditions = this.buildFilterConditions(filters);
 
-      // Execute hybrid search using MongoDB's native $rankFusion (2025 feature)
-      // Falls back to manual approach if $rankFusion is not available
-      const results = await this.executeHybridSearchWithRankFusion(
-        query,
-        queryEmbedding,
-        filterConditions,
-        {
-          limit,
-          vector_weight,
-          text_weight,
-          vector_index,
-          text_index,
-          include_embeddings,
-          explain_relevance
-        }
-      );
+      // Check MongoDB version and use appropriate hybrid search method
+      const mongoVersion = await this.getMongoDBVersion();
+      const supportsRankFusion = this.isRankFusionSupported(mongoVersion);
+
+      let results: HybridSearchResult[];
+
+      if (supportsRankFusion) {
+        console.log(`🚀 Using MongoDB Atlas $rankFusion (MongoDB ${mongoVersion}) for optimal hybrid search`);
+        results = await this.executeHybridSearchWithRankFusion(
+          query,
+          queryEmbedding,
+          filterConditions,
+          {
+            limit,
+            vector_weight,
+            text_weight,
+            vector_index,
+            text_index,
+            include_embeddings,
+            explain_relevance
+          }
+        );
+      } else {
+        console.log(`⚠️ MongoDB ${mongoVersion} detected - $rankFusion requires 8.1+, using manual hybrid search`);
+        results = await this.executeHybridSearchPipeline(
+          query,
+          queryEmbedding,
+          filterConditions,
+          {
+            limit,
+            vector_weight,
+            text_weight,
+            vector_index,
+            text_index,
+            include_embeddings,
+            explain_relevance
+          }
+        );
+      }
 
       return results;
     } catch (error) {
@@ -232,8 +277,9 @@ export class HybridSearchEngine {
   }
 
   /**
-   * Execute hybrid search using MongoDB's native $rankFusion (2025 feature)
-   * This replaces manual reciprocal rank fusion with MongoDB's optimized implementation
+   * Execute hybrid search using MongoDB Atlas $rankFusion (MongoDB 8.1+)
+   * EXACTLY following the official MongoDB 2025 documentation
+   * Uses reciprocal rank fusion with rank_constant = 60 (MongoDB default)
    */
   private async executeHybridSearchWithRankFusion(
     query: string,
@@ -244,114 +290,118 @@ export class HybridSearchEngine {
     const collection = this.db.collection('vector_embeddings');
 
     try {
-      // MongoDB $rankFusion syntax based on 2025 documentation
+      // EXACT MongoDB Atlas $rankFusion syntax from 2025 documentation
       const pipeline: any[] = [
         {
           $rankFusion: {
             input: {
-              pipelines: [
-                // Pipeline 1: Vector search
-                [
+              pipelines: {
+                // Named pipeline for vector search (EXACT docs format)
+                vectorPipeline: [
                   {
                     $vectorSearch: {
                       index: options.vector_index,
-                      queryVector: queryEmbedding,
                       path: 'embedding.values',
-                      numCandidates: Math.max(options.limit * 10, 150),
-                      limit: Math.max(options.limit * 2, 50),
-                      filter: filterConditions,
-                    },
-                  },
-                  {
-                    $addFields: {
-                      vector_score: { $meta: 'vectorSearchScore' },
-                    },
-                  },
+                      queryVector: queryEmbedding,
+                      numCandidates: Math.max(options.limit * 5, 100),
+                      limit: options.limit,
+                      // Add filters if provided (MongoDB Atlas format)
+                      ...(Object.keys(filterConditions).length > 0 && { filter: filterConditions })
+                    }
+                  }
                 ],
-                // Pipeline 2: Text search
-                [
-                  {
-                    $search: {
-                      index: options.text_index,
-                      compound: {
-                        must: [
-                          {
-                            text: {
-                              query: query,
-                              path: ['content.text', 'content.summary'],
-                            },
-                          },
-                        ],
-                        filter: Object.keys(filterConditions).length > 0 ? [filterConditions] : [],
-                      },
-                    },
-                  },
-                  {
-                    $addFields: {
-                      text_score: { $meta: 'searchScore' },
-                    },
-                  },
-                ],
-              ],
-              // Apply weights for reciprocal rank fusion
-              weights: [options.vector_weight, options.text_weight],
+                // Named pipeline for full-text search (EXACT docs format)
+                fullTextPipeline: [
+                  // Use compound query structure if filters are present
+                  ...(Object.keys(filterConditions).length > 0 ? [
+                    {
+                      $search: {
+                        index: options.text_index,
+                        compound: {
+                          must: [
+                            {
+                              text: {
+                                query: query,
+                                path: ['content.text', 'content.summary']
+                              }
+                            }
+                          ],
+                          filter: [filterConditions]
+                        }
+                      }
+                    }
+                  ] : [
+                    // Simple text search when no filters
+                    {
+                      $search: {
+                        index: options.text_index,
+                        text: {
+                          query: query,
+                          path: ['content.text', 'content.summary']
+                        }
+                      }
+                    }
+                  ]),
+                  { $limit: options.limit }
+                ]
+              }
             },
-          },
-        },
-        // Add combined score for compatibility
-        {
-          $addFields: {
-            combined_score: {
-              $add: [
-                { $multiply: ['$vector_score', options.vector_weight] },
-                { $multiply: ['$text_score', options.text_weight] },
-              ],
+            // EXACT combination syntax from MongoDB docs
+            combination: {
+              weights: {
+                vectorPipeline: options.vector_weight,
+                fullTextPipeline: options.text_weight
+              }
             },
-          },
+            // Enable score details for debugging (optional)
+            scoreDetails: options.explain_relevance
+          }
         },
-        // Limit results
-        { $limit: options.limit },
-        // Project final results
+        // Project results with score details from $meta
         {
           $project: {
             _id: 1,
             embedding_id: 1,
             content: 1,
             metadata: 1,
-            vector_score: 1,
-            text_score: 1,
-            combined_score: 1,
-            ...(options.include_embeddings && { 'embedding.values': 1 }),
+            // Get the reciprocal rank fusion score
+            combined_score: { $meta: 'rankFusionScore' },
+            // Get detailed scores if available
             ...(options.explain_relevance && {
-              relevance_explanation: {
-                $concat: [
-                  'RankFusion - Vector: ', { $toString: { $round: ['$vector_score', 3] } },
-                  ', Text: ', { $toString: { $round: ['$text_score', 3] } },
-                  ', Combined: ', { $toString: { $round: ['$combined_score', 3] } }
-                ]
-              }
-            })
-          },
+              scoreDetails: { $meta: 'scoreDetails' }
+            }),
+            ...(options.include_embeddings && { 'embedding.values': 1 })
+          }
         },
+        // Final limit (MongoDB $rankFusion handles internal ranking)
+        { $limit: options.limit }
       ];
 
       const results = await collection.aggregate(pipeline).toArray();
 
-      return results.map(doc => ({
-        _id: doc._id.toString(),
-        embedding_id: doc.embedding_id,
-        content: doc.content,
-        metadata: doc.metadata,
-        scores: {
-          vector_score: doc.vector_score || 0,
-          text_score: doc.text_score || 0,
-          combined_score: doc.combined_score || 0,
-        },
-        relevance_explanation: doc.relevance_explanation || 'RankFusion hybrid search result'
-      }));
+      return results.map(doc => {
+        // Extract individual pipeline scores from scoreDetails if available
+        const vectorScore = doc.scoreDetails?.vectorPipeline?.score || 0;
+        const textScore = doc.scoreDetails?.fullTextPipeline?.score || 0;
+
+        return {
+          _id: doc._id.toString(),
+          embedding_id: doc.embedding_id,
+          content: doc.content,
+          metadata: doc.metadata,
+          scores: {
+            vector_score: vectorScore,
+            text_score: textScore,
+            combined_score: doc.combined_score || 0,
+          },
+          relevance_explanation: options.explain_relevance
+            ? `MongoDB RankFusion (RRF): Vector=${vectorScore.toFixed(3)}, Text=${textScore.toFixed(3)}, Combined=${(doc.combined_score || 0).toFixed(3)}`
+            : 'MongoDB Atlas Hybrid Search with Reciprocal Rank Fusion'
+        };
+      });
     } catch (error) {
-      console.error('RankFusion hybrid search failed, falling back to manual approach:', error);
-      // Fallback to the existing manual approach
+      console.error('MongoDB Atlas RankFusion failed (requires MongoDB 8.1+), falling back to manual approach:', error);
+      // Fallback to the existing manual approach for older MongoDB versions
       return await this.executeHybridSearchPipeline(query, queryEmbedding, filterConditions, options);
     }
   }
@@ -631,6 +681,33 @@ export class HybridSearchEngine {
         performance_ms: Date.now() - startTime,
         recommendations: ['Search analysis failed - check index configuration']
       };
+    }
+  }
+
+  /**
+   * Get MongoDB version to determine $rankFusion support
+   */
+  private async getMongoDBVersion(): Promise<string> {
+    try {
+      const admin = this.db.admin();
+      const buildInfo = await admin.buildInfo();
+      return buildInfo.version;
+    } catch (error) {
+      console.warn('Could not determine MongoDB version:', error);
+      return '7.0.0'; // Assume older version if detection fails
+    }
+  }
+
+  /**
+   * Check if MongoDB version supports $rankFusion (requires 8.1+)
+   */
+  private isRankFusionSupported(version: string): boolean {
+    try {
+      const [major, minor] = version.split('.').map(Number);
+      return major > 8 || (major === 8 && minor >= 1);
+    } catch (error) {
+      console.warn('Could not parse MongoDB version:', version);
+      return false; // Assume not supported if parsing fails
     }
   }
 

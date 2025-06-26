@@ -1,6 +1,6 @@
 {
   "name": "universal-ai-brain",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "🧠 Universal AI Brain 2.0 - The world's most comprehensive cognitive architecture for AI agents with 12 cognitive systems, MongoDB Atlas integration, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
