@@ -27,6 +27,7 @@ import { ContextCollection } from './collections/ContextCollection';
 import { SemanticMemoryEngine } from './intelligence/SemanticMemoryEngine';
 import { ContextInjectionEngine } from './intelligence/ContextInjectionEngine';
 import { VectorSearchEngine } from './intelligence/VectorSearchEngine';
+import { HybridSearchEngine } from './features/hybridSearch';
 import { OpenAIEmbeddingProvider } from './embeddings/OpenAIEmbeddingProvider';
 import { VoyageAIEmbeddingProvider } from './embeddings/VoyageAIEmbeddingProvider';
 
@@ -102,6 +103,11 @@ export interface UniversalAIBrainConfig {
     vectorDimensions?: number;
     similarityThreshold?: number;
     maxContextLength?: number;
+    // Hybrid Search Configuration
+    enableHybridSearch?: boolean;
+    hybridSearchVectorWeight?: number;
+    hybridSearchTextWeight?: number;
+    hybridSearchFallbackToVector?: boolean;
   };
   safety?: {
     enableContentFiltering?: boolean;
@@ -174,7 +180,12 @@ const DEFAULT_CONFIG = {
     embeddingModel: 'voyage-large-2-instruct',
     vectorDimensions: 1024,
     similarityThreshold: 0.7,
-    maxContextLength: 4000
+    maxContextLength: 4000,
+    // Hybrid Search as DEFAULT - MongoDB's most powerful capability
+    enableHybridSearch: true,
+    hybridSearchVectorWeight: 0.7,
+    hybridSearchTextWeight: 0.3,
+    hybridSearchFallbackToVector: true
   },
   safety: {
     enableContentFiltering: true,
@@ -225,6 +236,7 @@ export class UniversalAIBrain {
   private semanticMemoryEngine!: SemanticMemoryEngine;
   private contextInjectionEngine!: ContextInjectionEngine;
   private vectorSearchEngine!: VectorSearchEngine;
+  private hybridSearchEngine!: HybridSearchEngine;
   private mongoVectorStore!: MongoVectorStore;
 
   // Cognitive Intelligence Layer
@@ -597,6 +609,90 @@ export class UniversalAIBrain {
   }
 
   /**
+   * Intelligent search using Hybrid Search with fallback to Vector Search
+   * This is the cornerstone method that leverages MongoDB's most powerful capabilities
+   */
+  private async performIntelligentSearch(
+    query: string,
+    options: {
+      limit?: number;
+      minScore?: number;
+      includeExplanation?: boolean;
+    } = {}
+  ): Promise<any[]> {
+    const {
+      limit = 10,
+      minScore = 0.7,
+      includeExplanation = true
+    } = options;
+
+    try {
+      // Use Hybrid Search if enabled (default)
+      if (this.config.intelligence?.enableHybridSearch !== false) {
+        try {
+          console.log('🚀 Using MongoDB Atlas Hybrid Search with $rankFusion');
+
+          const hybridResults = await this.hybridSearchEngine.search(
+            query,
+            {}, // filters
+            {
+              limit,
+              vector_weight: this.config.intelligence?.hybridSearchVectorWeight || 0.7,
+              text_weight: this.config.intelligence?.hybridSearchTextWeight || 0.3,
+              explain_relevance: includeExplanation
+            }
+          );
+
+          // Convert hybrid results to expected format
+          return hybridResults.map(result => ({
+            id: result._id,
+            content: result.content.text,
+            score: result.scores.combined_score,
+            metadata: result.metadata,
+            explanation: result.relevance_explanation
+          }));
+
+        } catch (hybridError) {
+          console.warn('⚠️ Hybrid search failed, falling back to vector search:', hybridError);
+
+          // Fallback to vector search if enabled
+          if (this.config.intelligence?.hybridSearchFallbackToVector !== false) {
+            return await this.performVectorSearchFallback(query, options);
+          } else {
+            throw hybridError;
+          }
+        }
+      } else {
+        // Use vector search when hybrid search is disabled
+        console.log('🔍 Using Vector Search (hybrid search disabled)');
+        return await this.performVectorSearchFallback(query, options);
+      }
+
+    } catch (error) {
+      console.error('❌ Intelligent search failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fallback vector search method
+   */
+  private async performVectorSearchFallback(
+    query: string,
+    options: {
+      limit?: number;
+      minScore?: number;
+      includeExplanation?: boolean;
+    }
+  ): Promise<any[]> {
+    return await this.vectorSearchEngine.semanticSearch(query, {
+      limit: options.limit,
+      minScore: options.minScore,
+      includeExplanation: options.includeExplanation
+    });
+  }
+
+  /**
    * Check content safety
    */
   async checkSafety(content: string): Promise<{
@@ -704,8 +800,8 @@ export class UniversalAIBrain {
         { framework, sessionId }
       );
 
-      // 3. Vector search for relevant information
-      const relevantMemories = await this.vectorSearchEngine.semanticSearch(
+      // 3. Intelligent search for relevant information (Hybrid Search by default)
+      const relevantMemories = await this.performIntelligentSearch(
         inputValidation.filteredContent || input,
         {
           limit: 10,
@@ -888,6 +984,10 @@ export class UniversalAIBrain {
 
     this.semanticMemoryEngine = new SemanticMemoryEngine(this.memoryCollection, embeddingProvider);
     this.vectorSearchEngine = new VectorSearchEngine(this.database, embeddingProvider);
+
+    // Initialize Hybrid Search Engine - MongoDB's most powerful search capability
+    this.hybridSearchEngine = new HybridSearchEngine(this.database, embeddingProvider);
+
     this.contextInjectionEngine = new ContextInjectionEngine(
       this.semanticMemoryEngine,
       this.vectorSearchEngine
@@ -1286,6 +1386,13 @@ export class UniversalAIBrain {
    */
   get socialIntelligence() {
     return this._socialIntelligenceEngine;
+  }
+
+  /**
+   * Access to Hybrid Search Engine - MongoDB's most powerful search capability
+   */
+  get hybridSearch() {
+    return this.hybridSearchEngine;
   }
 
   // ============================================================================
