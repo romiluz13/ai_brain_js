@@ -46,6 +46,18 @@ import { WorkflowOrchestrationEngine } from './intelligence/WorkflowOrchestratio
 import { MultiModalProcessingEngine } from './intelligence/MultiModalProcessingEngine';
 import { HumanFeedbackIntegrationEngine } from './intelligence/HumanFeedbackIntegrationEngine';
 
+// Phase 1 Integration: Working Memory and Decay Systems
+import { WorkingMemoryManager } from './intelligence/WorkingMemoryManager';
+import { MemoryDecayEngine } from './intelligence/MemoryDecayEngine';
+
+// Phase 2 Integration: Advanced Cognitive Systems
+import { AnalogicalMappingSystem } from './intelligence/AnalogicalMappingSystem';
+import { CausalReasoningEngine } from './intelligence/CausalReasoningEngine';
+import { SocialIntelligenceEngine } from './intelligence/SocialIntelligenceEngine';
+
+// Phase 3 Integration: Episodic Memory System
+import { EpisodicMemoryEngine } from './intelligence/EpisodicMemoryEngine';
+
 // Safety & Guardrails
 import { SafetyGuardrailsEngine } from './safety/SafetyGuardrailsEngine';
 import { HallucinationDetector } from './safety/HallucinationDetector';
@@ -230,6 +242,18 @@ export class UniversalAIBrain {
   private _workflowOrchestrationEngine!: WorkflowOrchestrationEngine;
   private _multiModalProcessingEngine!: MultiModalProcessingEngine;
   private _humanFeedbackIntegrationEngine!: HumanFeedbackIntegrationEngine;
+
+  // Phase 1 Integration: Working Memory and Decay Systems
+  private _workingMemoryManager!: WorkingMemoryManager;
+  private _memoryDecayEngine!: MemoryDecayEngine;
+
+  // Phase 2 Integration: Advanced Cognitive Systems
+  private _analogicalMappingSystem!: AnalogicalMappingSystem;
+  private _causalReasoningEngine!: CausalReasoningEngine;
+  private _socialIntelligenceEngine!: SocialIntelligenceEngine;
+
+  // Phase 3 Integration: Episodic Memory System
+  private _episodicMemoryEngine!: EpisodicMemoryEngine;
 
   // Safety & Guardrails
   private safetyEngine!: SafetyGuardrailsEngine;
@@ -906,6 +930,43 @@ export class UniversalAIBrain {
 
     this._humanFeedbackIntegrationEngine = new HumanFeedbackIntegrationEngine(this.database);
     await this._humanFeedbackIntegrationEngine.initialize();
+
+    // Phase 1 Integration: Initialize Working Memory and Decay Systems
+    console.log('🧠 Initializing Phase 1 systems: Working Memory & Memory Decay...');
+
+    this._workingMemoryManager = new WorkingMemoryManager(
+      this.database,
+      this.semanticMemoryEngine
+    );
+    await this._workingMemoryManager.initialize();
+
+    this._memoryDecayEngine = new MemoryDecayEngine(this.database);
+    await this._memoryDecayEngine.initialize();
+
+    console.log('✅ Phase 1 systems initialized successfully');
+
+    // Phase 2 Integration: Initialize Advanced Cognitive Systems
+    console.log('🧠 Initializing Phase 2 systems: Analogical, Causal, Social...');
+
+    this._analogicalMappingSystem = new AnalogicalMappingSystem(this.database);
+    await this._analogicalMappingSystem.initialize();
+
+    this._causalReasoningEngine = new CausalReasoningEngine(this.database);
+    await this._causalReasoningEngine.initialize();
+
+    this._socialIntelligenceEngine = new SocialIntelligenceEngine(this.database);
+    await this._socialIntelligenceEngine.initialize();
+
+    console.log('✅ Phase 2 systems initialized successfully');
+
+    // Phase 3 Integration: Initialize Episodic Memory System (after other memory systems)
+    console.log('🧠 Initializing Phase 3 system: Episodic Memory...');
+
+    this._episodicMemoryEngine = new EpisodicMemoryEngine(this.database);
+    await this._episodicMemoryEngine.initialize();
+
+    console.log('✅ Phase 3 system initialized successfully');
+    console.log('🎉 ALL 18 COGNITIVE SYSTEMS INTEGRATED SUCCESSFULLY!');
   }
 
   private async initializeSafetySystems(): Promise<void> {
@@ -1182,6 +1243,60 @@ export class UniversalAIBrain {
    */
   get humanFeedbackIntegration() {
     return this._humanFeedbackIntegrationEngine;
+  }
+
+  // ============================================================================
+  // PHASE 1 INTEGRATION: WORKING MEMORY & DECAY SYSTEMS
+  // ============================================================================
+
+  /**
+   * Access to Working Memory Manager
+   */
+  get workingMemory() {
+    return this._workingMemoryManager;
+  }
+
+  /**
+   * Access to Memory Decay Engine
+   */
+  get memoryDecay() {
+    return this._memoryDecayEngine;
+  }
+
+  // ============================================================================
+  // PHASE 2 INTEGRATION: ADVANCED COGNITIVE SYSTEMS
+  // ============================================================================
+
+  /**
+   * Access to Analogical Mapping System
+   */
+  get analogicalMapping() {
+    return this._analogicalMappingSystem;
+  }
+
+  /**
+   * Access to Causal Reasoning Engine
+   */
+  get causalReasoning() {
+    return this._causalReasoningEngine;
+  }
+
+  /**
+   * Access to Social Intelligence Engine
+   */
+  get socialIntelligence() {
+    return this._socialIntelligenceEngine;
+  }
+
+  // ============================================================================
+  // PHASE 3 INTEGRATION: EPISODIC MEMORY SYSTEM
+  // ============================================================================
+
+  /**
+   * Access to Episodic Memory Engine
+   */
+  get episodicMemory() {
+    return this._episodicMemoryEngine;
   }
 
   /**

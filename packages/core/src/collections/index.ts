@@ -27,6 +27,12 @@ export { SkillCapabilityCollection } from './SkillCapabilityCollection';
 export { CommunicationProtocolCollection } from './CommunicationProtocolCollection';
 export { TemporalPlanCollection } from './TemporalPlanCollection';
 
+// Phase 2 Integration: Advanced Cognitive Collections
+export { AnalogicalMappingCollection } from './AnalogicalMappingCollection';
+export { CausalRelationshipCollection } from './CausalRelationshipCollection';
+export { SocialIntelligenceCollection } from './SocialIntelligenceCollection';
+export { EpisodicMemoryCollection } from './EpisodicMemoryCollection';
+
 // Collection filter and update types
 export type {
   AgentFilter,
@@ -130,6 +136,10 @@ import { GoalHierarchyCollection } from './GoalHierarchyCollection';
 import { ConfidenceTrackingCollection } from './ConfidenceTrackingCollection';
 import { AttentionStateCollection } from './AttentionStateCollection';
 import { CulturalKnowledgeCollection } from './CulturalKnowledgeCollection';
+import { AnalogicalMappingCollection } from './AnalogicalMappingCollection';
+import { CausalRelationshipCollection } from './CausalRelationshipCollection';
+import { SocialIntelligenceCollection } from './SocialIntelligenceCollection';
+import { EpisodicMemoryCollection } from './EpisodicMemoryCollection';
 
 export class CollectionManager {
   private db: Db;
@@ -150,6 +160,12 @@ export class CollectionManager {
   public attentionStates: AttentionStateCollection;
   public culturalKnowledge: CulturalKnowledgeCollection;
 
+  // Phase 2 Integration: Advanced cognitive collection instances
+  public analogicalMappings: AnalogicalMappingCollection;
+  public causalRelationships: CausalRelationshipCollection;
+  public socialIntelligence: SocialIntelligenceCollection;
+  public episodicMemories: EpisodicMemoryCollection;
+
   constructor(db: Db) {
     this.db = db;
     
@@ -168,6 +184,12 @@ export class CollectionManager {
     this.confidenceTracking = new ConfidenceTrackingCollection(db);
     this.attentionStates = new AttentionStateCollection(db);
     this.culturalKnowledge = new CulturalKnowledgeCollection(db);
+
+    // Initialize Phase 2 advanced cognitive collections
+    this.analogicalMappings = new AnalogicalMappingCollection(db);
+    this.causalRelationships = new CausalRelationshipCollection(db);
+    this.socialIntelligence = new SocialIntelligenceCollection(db);
+    this.episodicMemories = new EpisodicMemoryCollection(db);
   }
 
   /**
@@ -190,7 +212,12 @@ export class CollectionManager {
         this.goalHierarchies.createIndexes(),
         this.confidenceTracking.createIndexes(),
         this.attentionStates.createIndexes(),
-        this.culturalKnowledge.createIndexes()
+        this.culturalKnowledge.createIndexes(),
+        // Phase 2 Integration: Advanced cognitive collections
+        this.analogicalMappings.createIndexes(),
+        this.causalRelationships.createIndexes(),
+        this.socialIntelligence.createIndexes(),
+        this.episodicMemories.createIndexes()
       ]);
 
       console.log('✅ All collection indexes created successfully');
