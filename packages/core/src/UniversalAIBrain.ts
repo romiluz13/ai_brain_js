@@ -353,7 +353,20 @@ export class UniversalAIBrain {
   }
 
   /**
-   * 🦜 FOR LANGCHAIN - Optimized for LangChain.js
+   * � FOR OPENAI - Optimized for OpenAI Chat Completions API
+   */
+  static forOpenAI(config?: { mongoUri?: string; apiKey?: string }): UniversalAIBrain {
+    return new UniversalAIBrain({
+      mode: 'production',
+      mongoUri: config?.mongoUri,
+      apiKey: config?.apiKey,
+      databaseName: 'ai_brain_openai',
+      provider: 'openai' // Direct OpenAI integration
+    });
+  }
+
+  /**
+   * �🦜 FOR LANGCHAIN - Optimized for LangChain.js
    */
   static forLangChain(config?: { mongoUri?: string; apiKey?: string }): UniversalAIBrain {
     return new UniversalAIBrain({

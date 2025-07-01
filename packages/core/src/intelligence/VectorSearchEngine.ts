@@ -528,85 +528,81 @@ export class VectorSearchEngine {
       includeExplanation: boolean;
     }
   ): any[] {
+    // CORRECT $rankFusion implementation for MongoDB 8.1+
     return [
-      // Stage 1: Vector search
       {
-        $vectorSearch: {
-          index: this.vectorIndexName,
-          path: 'embedding.values',
-          queryVector: queryEmbedding,
-          numCandidates: Math.max(options.limit * 10, 150),
-          limit: options.limit * 2,
-          filter: options.filters
-        }
-      },
-      {
-        $addFields: {
-          vectorScore: { $meta: 'vectorSearchScore' }
-        }
-      },
-      // Stage 2: Text search
-      {
-        $search: {
-          index: this.textIndexName,
-          compound: {
-            must: [
-              {
-                text: {
-                  query: options.textQuery,
-                  path: ['content.text', 'content.summary']
+        $rankFusion: {
+          input: {
+            pipelines: {
+              vectorPipeline: [
+                {
+                  $vectorSearch: {
+                    index: this.vectorIndexName,
+                    path: 'embedding.values',
+                    queryVector: queryEmbedding,
+                    numCandidates: Math.max(options.limit * 10, 150),
+                    limit: options.limit * 2,
+                    filter: options.filters
+                  }
                 }
-              }
-            ],
-            filter: Object.keys(options.filters).length > 0 ? [options.filters] : []
-          }
+              ],
+              textPipeline: [
+                {
+                  $search: {
+                    index: this.textIndexName,
+                    compound: {
+                      must: [
+                        {
+                          text: {
+                            query: options.textQuery,
+                            path: ['content.text', 'content.summary']
+                          }
+                        }
+                      ],
+                      filter: Object.keys(options.filters).length > 0 ? [options.filters] : []
+                    }
+                  }
+                },
+                { $limit: options.limit * 2 }
+              ]
+            }
+          },
+          combination: {
+            weights: {
+              vectorPipeline: options.vectorWeight,
+              textPipeline: options.textWeight
+            }
+          },
+          scoreDetails: true
         }
       },
-      {
-        $addFields: {
-          textScore: { $meta: 'searchScore' }
-        }
-      },
-      // Stage 3: Combine scores
-      {
-        $addFields: {
-          combinedScore: {
-            $add: [
-              { $multiply: ['$vectorScore', options.vectorWeight] },
-              { $multiply: ['$textScore', options.textWeight] }
-            ]
-          }
-        }
-      },
-      // Stage 4: Filter and sort
-      {
-        $match: {
-          combinedScore: { $gte: options.minScore }
-        }
-      },
-      { $sort: { combinedScore: -1 } },
-      { $limit: options.limit },
-      // Stage 5: Project results
+      // Project results AFTER $rankFusion (this is allowed)
       {
         $project: {
           _id: 1,
           content: 1,
           metadata: 1,
-          vectorScore: 1,
-          textScore: 1,
-          combinedScore: 1,
+          hybridScore: { $meta: 'scoreDetails' },
           ...(options.includeEmbeddings && { 'embedding.values': 1 }),
           ...(options.includeExplanation && {
             explanation: {
               $concat: [
-                'Vector: ', { $toString: { $round: ['$vectorScore', 3] } },
-                ', Text: ', { $toString: { $round: ['$textScore', 3] } },
-                ', Combined: ', { $toString: { $round: ['$combinedScore', 3] } }
+                'Hybrid search using $rankFusion with weights - Vector: ',
+                { $toString: options.vectorWeight },
+                ', Text: ',
+                { $toString: options.textWeight }
               ]
             }
           })
         }
-      }
+      },
+      // Filter by minimum score and limit results
+      {
+        $match: {
+          'hybridScore.value': { $gte: options.minScore }
+        }
+      },
+      { $limit: options.limit }
     ];
   }
 
@@ -618,7 +614,7 @@ export class VectorSearchEngine {
     return results.map(doc => ({
       id: doc._id.toString(),
       content: doc.content?.text || doc.content || '',
-      score: doc.combinedScore || doc.vectorScore || doc.textScore || 0,
+      score: doc.hybridScore?.value || doc.combinedScore || doc.vectorScore || doc.textScore || 0,
       metadata: doc.metadata || {},
       embedding: doc.embedding?.values,
       explanation: doc.explanation || (includeExplanation ? `${searchType} search result` : undefined)

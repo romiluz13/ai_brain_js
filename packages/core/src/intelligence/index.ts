@@ -10,6 +10,9 @@
 export { SemanticMemoryEngine } from './SemanticMemoryEngine';
 export { ContextInjectionEngine } from './ContextInjectionEngine';
 export { VectorSearchEngine } from './VectorSearchEngine';
+export { WorkingMemoryManager } from './WorkingMemoryManager';
+export { EpisodicMemoryEngine } from './EpisodicMemoryEngine';
+export { MemoryDecayEngine } from './MemoryDecayEngine';
 
 // Cognitive Intelligence Engines
 export { EmotionalIntelligenceEngine } from './EmotionalIntelligenceEngine';
@@ -20,6 +23,18 @@ export { CulturalKnowledgeEngine } from './CulturalKnowledgeEngine';
 export { SkillCapabilityManager } from './SkillCapabilityManager';
 export { CommunicationProtocolManager } from './CommunicationProtocolManager';
 export { TemporalPlanningEngine } from './TemporalPlanningEngine';
+export { SelfImprovementEngine } from './SelfImprovementEngine';
+export { SocialIntelligenceEngine } from './SocialIntelligenceEngine';
+
+// Advanced Intelligence Engines
+export { AdvancedToolInterface } from './AdvancedToolInterface';
+export { AnalogicalMappingSystem } from './AnalogicalMappingSystem';
+export { CausalReasoningEngine } from './CausalReasoningEngine';
+export { ChangeStreamManager } from './ChangeStreamManager';
+export { HumanFeedbackIntegrationEngine } from './HumanFeedbackIntegrationEngine';
+export { MultiModalProcessingEngine } from './MultiModalProcessingEngine';
+export { NotificationManager } from './NotificationManager';
+export { WorkflowOrchestrationEngine } from './WorkflowOrchestrationEngine';
 
 // Types and Interfaces
 export type {

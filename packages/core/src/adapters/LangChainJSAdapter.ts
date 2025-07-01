@@ -344,11 +344,12 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
   // Framework-specific implementation methods
   public checkFrameworkAvailability(): boolean {
     try {
-      // Try to import REAL LangChain.js framework
+      // Try to import REAL LangChain.js framework (CORRECT packages from official docs)
       require.resolve('@langchain/core');
+      require.resolve('@langchain/openai');
       return true;
     } catch {
-      console.warn('⚠️ LangChain.js not found. Install with: npm install @langchain/core');
+      console.warn('⚠️ LangChain.js not found. Install with: npm install @langchain/core @langchain/openai');
       return false;
     }
   }
@@ -461,15 +462,15 @@ export class LangChainJSAdapter extends BaseFrameworkAdapter<any> {
    */
   async validateRealIntegration(): Promise<boolean> {
     try {
-      // Try to import the actual LangChain classes
+      // Try to import the actual LangChain classes (CORRECT IMPORTS from official docs)
       const { ChatOpenAI } = await import('@langchain/openai');
-      const { LLMChain } = await import('langchain/chains');
       const { PromptTemplate } = await import('@langchain/core/prompts');
+      const { RunnableSequence } = await import('@langchain/core/runnables');
 
       // Verify they are constructors
       if (typeof ChatOpenAI !== 'function' ||
-          typeof LLMChain !== 'function' ||
-          typeof PromptTemplate !== 'function') {
+          typeof PromptTemplate !== 'function' ||
+          typeof RunnableSequence !== 'function') {
         return false;
       }
 

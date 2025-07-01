@@ -1,7 +1,7 @@
 {
   "name": "universal-ai-brain",
-  "version": "2.0.4",
-  "description": "🧠 Universal AI Brain 2.0 - The world's most comprehensive cognitive architecture for AI agents with 12 cognitive systems, MongoDB Atlas integration, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
+  "version": "3.0.1",
+  "description": "🧠 Universal AI Brain 3.0 - The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 $rankFusion hybrid search, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
     "README.md",
@@ -10,7 +10,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "echo 'Building Universal AI Brain 2.0.1 (JavaScript)...' && cp -r src dist && echo 'Build complete - JavaScript files copied'",
+    "build": "echo 'Building Universal AI Brain 3.0 (JavaScript)...' && cp -r src dist && echo 'Build complete - JavaScript files copied'",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
     "clean": "rimraf dist",
@@ -23,11 +23,14 @@
   },
   "keywords": [
     "universal-ai-brain",
-    "ai-brain-2.0",
+    "ai-brain-3.0",
     "cognitive-architecture",
-    "mongodb-atlas",
+    "mongodb-8.1",
+    "rankfusion",
+    "hybrid-search",
     "ai-agents",
     "vector-search",
+    "24-cognitive-systems",
     "semantic-memory",
     "emotional-intelligence",
     "goal-hierarchy",

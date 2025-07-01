@@ -12,6 +12,7 @@ export { BaseFrameworkAdapter } from './adapters/BaseFrameworkAdapter';
 export { MastraAdapter } from './adapters/MastraAdapter';
 export { VercelAIAdapter } from './adapters/VercelAIAdapter';
 export { LangChainJSAdapter } from './adapters/LangChainJSAdapter';
+export { OpenAIAdapter } from './adapters/OpenAIAdapter';
 export { OpenAIAgentsAdapter } from './adapters/OpenAIAgentsAdapter';
 
 // Vector Search and Embeddings

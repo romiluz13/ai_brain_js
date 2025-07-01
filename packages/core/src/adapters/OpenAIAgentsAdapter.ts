@@ -10,34 +10,24 @@ import { BaseFrameworkAdapter } from './BaseFrameworkAdapter';
 import { UniversalAIBrain } from '../UniversalAIBrain';
 import { FrameworkAdapter, FrameworkCapabilities, AdapterConfig } from '../types';
 
-// OpenAI Agents types (will be imported from @openai/agents when available)
-interface OpenAIAgent {
+// OpenAI types (using official OpenAI Node.js client)
+import OpenAI from 'openai';
+
+interface OpenAIAgentConfig {
   name?: string;
   instructions?: string;
   model?: string;
-  tools?: any[];
-  run(input: string, options?: any): Promise<any>;
-  stream(input: string, options?: any): Promise<any>;
+  tools?: OpenAI.Chat.Completions.ChatCompletionTool[];
+  temperature?: number;
+  maxTokens?: number;
 }
 
-interface OpenAITool {
-  name: string;
-  description: string;
-  input_schema?: any;
-  output_schema?: any;
-  func: (args: any) => Promise<any>;
-}
-
-interface OpenAIRunResult {
-  finalOutput: string;
-  history: any[];
-  state: any;
-}
-
-export interface OpenAIAgentsAdapterConfig extends Omit<AdapterConfig, 'enableToolIntegration'> {
-  enableAgentEnhancement?: boolean;
+export interface OpenAIAdapterConfig extends Omit<AdapterConfig, 'enableToolIntegration'> {
+  enableChatEnhancement?: boolean;
   enableToolIntegration?: boolean;
   enableMemoryPersistence?: boolean;
+  openaiApiKey?: string;
+  baseURL?: string;
 }
 
 /**
@@ -49,18 +39,17 @@ export interface OpenAIAgentsAdapterConfig extends Omit<AdapterConfig, 'enableTo
  * - Persists agent conversations and state in MongoDB
  * - Integrates with OpenAI Agents handoff system
  */
-export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
+export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<any> {
   public readonly frameworkName = 'OpenAI Agents JS';
   public readonly version = '1.0.0';
 
-  private enhancedAgents: Map<string, OpenAIAgent> = new Map();
+  private enhancedAgents: Map<string, any> = new Map();
 
-  constructor(config?: Partial<OpenAIAgentsAdapterConfig>) {
+  constructor(config?: Partial<OpenAIAdapterConfig>) {
     super({
       enableMemoryInjection: true,
       enableContextEnhancement: true,
       enableToolIntegration: true,
-      enableAgentEnhancement: true,
       enableMemoryPersistence: true,
       ...config
     });
@@ -88,9 +77,9 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
     name?: string;
     instructions?: string;
     model?: string;
-    tools?: OpenAITool[];
+    tools?: any[];
     conversationId?: string;
-  }): OpenAIAgent {
+  }): any {
     if (!this.brain) {
       throw new Error('OpenAIAgentsAdapter not initialized. Call integrate() first.');
     }
@@ -102,7 +91,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
     const mongoDBTools = this.createMongoDBTools();
     const allTools = [...(config.tools || []), ...mongoDBTools];
 
-    const enhancedAgent: OpenAIAgent = {
+    const enhancedAgent: any = {
       name: config.name,
       instructions: config.instructions,
       model: config.model,
@@ -186,7 +175,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
   /**
    * Enhance an existing OpenAI agent with MongoDB capabilities
    */
-  enhanceExistingAgent(agent: OpenAIAgent, conversationId?: string): OpenAIAgent {
+  enhanceExistingAgent(agent: any, conversationId?: string): any {
     if (!this.brain) {
       throw new Error('OpenAIAgentsAdapter not initialized. Call integrate() first.');
     }
@@ -254,7 +243,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
   /**
    * Create MongoDB-powered tools for OpenAI agents
    */
-  private createMongoDBTools(): OpenAITool[] {
+  private createMongoDBTools(): any[] {
     return [
       {
         name: 'search_mongodb_knowledge',
@@ -335,7 +324,7 @@ export class OpenAIAgentsAdapter extends BaseFrameworkAdapter<OpenAIAgent> {
   /**
    * Create a memory tool for persistent conversations
    */
-  private createMemoryTool(): OpenAITool {
+  private createMemoryTool(): any {
     return {
       name: 'mongodb_memory',
       description: 'Access conversation memory and context from MongoDB',
