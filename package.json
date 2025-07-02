@@ -1,8 +1,8 @@
 {
   "name": "universal-ai-brain",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "private": false,
-  "description": "🎉🧠 UNIVERSAL AI BRAIN 2.0.1 - PERFECT TYPESCRIPT COMPILATION ACHIEVED! 🚀 The world's most advanced cognitive architecture with 12 intelligence systems, MongoDB Atlas Vector Search, enterprise safety, and framework-agnostic design. Zero errors, infinite possibilities!",
+  "description": "🧠 UNIVERSAL AI BRAIN 3.0 - The world's most advanced cognitive architecture with 24 specialized systems, MongoDB 8.1 $rankFusion hybrid search, and framework-agnostic design. Works with Mastra, Vercel AI, LangChain, OpenAI Agents, and more!",
   "author": "Rom Iluz <rom@iluz.net>",
   "license": "MIT",
   "repository": {
@@ -15,24 +15,27 @@
   "homepage": "https://github.com/romiluz13/ai_brain_js#readme",
   "keywords": [
     "universal-ai-brain",
-    "ai-brain-2.0",
+    "ai-brain-3.0",
     "cognitive-architecture",
-    "mongodb-atlas",
+    "mongodb-8.1",
+    "rankfusion",
+    "hybrid-search",
     "vector-search",
     "ai-agents",
     "artificial-intelligence",
     "machine-learning",
     "typescript",
     "framework-agnostic",
-    "zero-errors",
-    "perfect-compilation",
+    "24-cognitive-systems",
     "enterprise-ai",
-    "safety-systems",
-    "self-improvement",
+    "production-ready",
     "vercel-ai",
     "mastra",
     "langchain",
-    "openai-agents"
+    "openai-agents",
+    "emotional-intelligence",
+    "memory-systems",
+    "self-improvement"
   ],
   "workspaces": [
     "packages/*"

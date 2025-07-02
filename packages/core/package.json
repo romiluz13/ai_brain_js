@@ -1,9 +1,10 @@
 {
   "name": "universal-ai-brain",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "🧠 Universal AI Brain 3.0 - The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 $rankFusion hybrid search, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
+    "tests/cognitive-systems/**/*",
     "README.md",
     "LICENSE"
   ],
@@ -19,7 +20,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:cognitive": "cd tests/cognitive-systems && npm run test:all",
+    "test:cognitive:memory": "cd tests/cognitive-systems && npm run test:memory",
+    "test:cognitive:benchmark": "cd tests/cognitive-systems && npm run benchmark:full",
+    "test:cognitive:setup": "cd tests/cognitive-systems && npm install"
   },
   "keywords": [
     "universal-ai-brain",
