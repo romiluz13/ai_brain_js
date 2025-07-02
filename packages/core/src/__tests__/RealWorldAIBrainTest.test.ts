@@ -42,7 +42,7 @@ describe('🧠 Universal AI Brain - Real World Integration Test', () => {
         }
       },
       intelligence: {
-        embeddingModel: 'voyage-large-2-instruct',
+        embeddingModel: 'voyage-3.5',
         vectorDimensions: 1024,
         similarityThreshold: 0.7,
         maxContextLength: 4000

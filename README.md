@@ -151,12 +151,16 @@ npm install
 ```typescript
 import { UniversalAIBrain } from 'universal-ai-brain';
 
-// 🚀 SIMPLE SETUP - Just provide MongoDB URI and API key
-const brain = new UniversalAIBrain({
-  mongoUri: 'mongodb+srv://your-cluster.mongodb.net/?retryWrites=true&w=majority',
-  apiKey: process.env.OPENAI_API_KEY,  // or VOYAGE_API_KEY
-  databaseName: 'ai_brain',
-  provider: 'openai'  // or 'voyage'
+// 🚀 SIMPLE SETUP - Latest Voyage 3.5 model (recommended)
+const brain = UniversalAIBrain.forVoyage({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.VOYAGE_API_KEY,
+});
+
+// Or use OpenAI as fallback
+const brain = UniversalAIBrain.forOpenAI({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // OR use static factory methods for even easier setup:
@@ -178,6 +182,9 @@ const brain = UniversalAIBrain.forLangChain({
   mongoUri: process.env.MONGODB_URI,
   apiKey: process.env.OPENAI_API_KEY
 });
+```
+
+📖 **[Complete Integration Guide →](./INTEGRATION_GUIDE.md)** | 🎯 **[Framework Examples →](./examples/)**
 
 // Initialize all 24 cognitive systems
 await brain.initialize();
@@ -1356,7 +1363,7 @@ const brain = new UniversalAIBrain({
     }
   },
   intelligence: {
-    embeddingModel: 'voyage-large-2-instruct',
+    embeddingModel: 'voyage-3.5',
     vectorDimensions: 1024,
     similarityThreshold: 0.7,
     maxContextLength: 4000,
@@ -1369,7 +1376,7 @@ const brain = new UniversalAIBrain({
   embeddings: {
     provider: 'voyage', // or 'openai'
     apiKey: process.env.VOYAGE_API_KEY,
-    model: 'voyage-large-2-instruct'
+    model: 'voyage-3.5'
   },
   safety: {
     enablePIIDetection: true,

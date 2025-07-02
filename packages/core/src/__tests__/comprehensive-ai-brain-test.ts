@@ -111,7 +111,7 @@ describe('🧠 Universal AI Brain 2.0 - Comprehensive Real-World Test', () => {
       }
     },
     intelligence: {
-      embeddingModel: 'voyage-large-2-instruct',
+      embeddingModel: 'voyage-3.5',
       vectorDimensions: 1024,
       similarityThreshold: 0.7,
       maxContextLength: 4000
@@ -151,7 +151,7 @@ describe('🧠 Universal AI Brain 2.0 - Comprehensive Real-World Test', () => {
     const openaiApiKey = process.env.OPENAI_API_KEY;
     
     embeddingProvider = voyageApiKey 
-      ? new VoyageAIEmbeddingProvider({ apiKey: voyageApiKey, model: 'voyage-large-2-instruct' })
+      ? new VoyageAIEmbeddingProvider({ apiKey: voyageApiKey, model: 'voyage-3.5' })
       : new OpenAIEmbeddingProvider({ apiKey: openaiApiKey!, model: 'text-embedding-3-small' });
     
     hybridSearchEngine = new HybridSearchEngine(database, embeddingProvider);

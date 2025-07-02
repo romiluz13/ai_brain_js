@@ -56,7 +56,7 @@ export class VoyageAIEmbeddingProvider implements EmbeddingProvider {
       batchSize: 128, // Voyage AI supports up to 1000, but 128 is more conservative
       baseUrl: 'https://api.voyageai.com/v1',
       inputType: null,
-      outputDimension: undefined, // Use model default
+      // outputDimension: undefined, // Use model default - will be set by model dimensions
       outputDtype: 'float',
       ...config
     };

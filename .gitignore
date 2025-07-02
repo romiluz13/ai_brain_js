@@ -82,3 +82,13 @@ jspm_packages/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
+# Internal development files and demos (not for public release)
+packages/core/src/mastra-test-agent/
+memory-palace-demo/
+**/demo/
+**/demos/
+**/*-demo.ts
+**/*-demo.js
+test-*.js
+test-*.ts

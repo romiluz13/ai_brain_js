@@ -177,7 +177,7 @@ function getErrorMessage(error: unknown): string {
 // 🎯 SMART DEFAULTS FOR EASY SETUP
 const DEFAULT_CONFIG = {
   intelligence: {
-    embeddingModel: 'voyage-large-2-instruct',
+    embeddingModel: 'voyage-3.5',
     vectorDimensions: 1024,
     similarityThreshold: 0.7,
     maxContextLength: 4000,
@@ -421,7 +421,7 @@ export class UniversalAIBrain {
       },
       intelligence: {
         ...DEFAULT_CONFIG.intelligence,
-        embeddingModel: provider === 'voyage' ? 'voyage-large-2-instruct' : 'text-embedding-3-small',
+        embeddingModel: provider === 'voyage' ? 'voyage-3.5' : 'text-embedding-3-small',
         vectorDimensions: provider === 'voyage' ? 1024 : 1536
       },
       safety: DEFAULT_CONFIG.safety,
@@ -973,31 +973,112 @@ export class UniversalAIBrain {
   }
 
   private async initializeIntelligenceLayer(): Promise<void> {
-    // Create Voyage AI embedding provider (preferred over OpenAI)
+    // Get API keys and determine provider preference
     const voyageApiKey = this.config.apis?.voyage?.apiKey || process.env.VOYAGE_API_KEY || '';
     const openaiApiKey = this.config.apis?.openai?.apiKey || process.env.OPENAI_API_KEY || '';
     const isTestMode = voyageApiKey.startsWith('test-key-') || openaiApiKey.startsWith('test-key-');
 
-    console.log('🔑 API Key debug:', {
+    // Determine preferred provider from configuration
+    const preferredProvider = this.getPreferredProvider();
+
+    console.log('🔑 Provider selection:', {
+      preferredProvider,
       voyageApiKey: voyageApiKey ? 'present' : 'missing',
       openaiApiKey: openaiApiKey ? 'present' : 'missing',
       testMode: isTestMode
     });
 
-    // Prefer Voyage AI, fallback to OpenAI for testing
-    const embeddingProvider = voyageApiKey && !isTestMode
-      ? new VoyageAIEmbeddingProvider({
-          apiKey: voyageApiKey,
-          model: this.config.intelligence?.embeddingModel || 'voyage-large-2-instruct'
-        })
-      : new OpenAIEmbeddingProvider({
-          apiKey: openaiApiKey || 'test-key-for-testing',
-          model: this.config.intelligence?.embeddingModel || 'text-embedding-3-small'
-        });
+    // Create embedding provider based on user preference, with fallback
+    const embeddingProvider = this.createEmbeddingProvider(
+      preferredProvider,
+      voyageApiKey,
+      openaiApiKey,
+      isTestMode
+    );
 
     this.semanticMemoryEngine = new SemanticMemoryEngine(this.memoryCollection, embeddingProvider);
     this.vectorSearchEngine = new VectorSearchEngine(this.database, embeddingProvider);
 
+    // Initialize all cognitive engines
+    await this.initializeCognitiveEngines(embeddingProvider);
+  }
+
+  /**
+   * Determine preferred embedding provider from configuration
+   */
+  private getPreferredProvider(): 'voyage' | 'openai' {
+    // Check if user explicitly set a provider via static methods
+    if (this.config.apis?.voyage && !this.config.apis?.openai) {
+      return 'voyage';
+    }
+    if (this.config.apis?.openai && !this.config.apis?.voyage) {
+      return 'openai';
+    }
+
+    // Check embedding model to infer provider preference
+    const embeddingModel = this.config.intelligence?.embeddingModel;
+    if (embeddingModel?.startsWith('voyage-')) {
+      return 'voyage';
+    }
+    if (embeddingModel?.startsWith('text-embedding-')) {
+      return 'openai';
+    }
+
+    // Default preference: Voyage AI (better for retrieval)
+    return 'voyage';
+  }
+
+  /**
+   * Create embedding provider based on preference with safe fallback
+   */
+  private createEmbeddingProvider(
+    preferredProvider: 'voyage' | 'openai',
+    voyageApiKey: string,
+    openaiApiKey: string,
+    isTestMode: boolean
+  ): OpenAIEmbeddingProvider | VoyageAIEmbeddingProvider {
+
+    if (preferredProvider === 'voyage') {
+      // User wants Voyage - try Voyage first, fallback to OpenAI
+      if (voyageApiKey && !isTestMode) {
+        console.log('✅ Using Voyage AI (user preference)');
+        return new VoyageAIEmbeddingProvider({
+          apiKey: voyageApiKey,
+          model: this.config.intelligence?.embeddingModel || 'voyage-3.5'
+        });
+      } else if (openaiApiKey) {
+        console.log('⚠️  Voyage AI preferred but not available, falling back to OpenAI');
+        return new OpenAIEmbeddingProvider({
+          apiKey: openaiApiKey,
+          model: this.config.intelligence?.embeddingModel || 'text-embedding-3-small'
+        });
+      }
+    } else {
+      // User wants OpenAI - try OpenAI first, fallback to Voyage
+      if (openaiApiKey && !isTestMode) {
+        console.log('✅ Using OpenAI (user preference)');
+        return new OpenAIEmbeddingProvider({
+          apiKey: openaiApiKey,
+          model: this.config.intelligence?.embeddingModel || 'text-embedding-3-small'
+        });
+      } else if (voyageApiKey) {
+        console.log('⚠️  OpenAI preferred but not available, falling back to Voyage AI');
+        return new VoyageAIEmbeddingProvider({
+          apiKey: voyageApiKey,
+          model: this.config.intelligence?.embeddingModel || 'voyage-3.5'
+        });
+      }
+    }
+
+    // Final fallback for test mode
+    console.log('🧪 Using test mode embedding provider');
+    return new OpenAIEmbeddingProvider({
+      apiKey: 'test-key-for-testing',
+      model: 'text-embedding-3-small'
+    });
+  }
+
+  private async initializeCognitiveEngines(embeddingProvider: OpenAIEmbeddingProvider | VoyageAIEmbeddingProvider): Promise<void> {
     // Initialize Hybrid Search Engine - MongoDB's most powerful search capability
     this.hybridSearchEngine = new HybridSearchEngine(this.database, embeddingProvider);
 
