@@ -78,6 +78,24 @@ The Universal AI Brain provides:
 
 **= 90% Complete Intelligent System** 🎯
 
+## 🧪 Testing
+
+Test all 24 cognitive systems with real data:
+
+```bash
+# One-command setup
+npm run setup:cognitive
+
+# Test all cognitive systems
+npm run test:cognitive
+
+# Test memory systems
+npm run test:cognitive:memory
+
+# Full benchmark
+npm run test:cognitive:benchmark
+```
+
 ## 📦 Requirements
 
 - Node.js 18+

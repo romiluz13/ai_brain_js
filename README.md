@@ -1452,6 +1452,9 @@ NODE_ENV=production
 # Run all tests
 npm test
 
+# One-command setup for cognitive testing
+npm run setup:cognitive
+
 # Test all 24 cognitive systems
 npm run test:cognitive
 
@@ -1460,9 +1463,6 @@ npm run test:cognitive:memory
 
 # Full cognitive benchmark (all 24 systems)
 npm run test:cognitive:benchmark
-
-# Setup cognitive testing environment
-npm run test:cognitive:setup
 ```
 
 ### 📊 **Monitoring & Analytics**
