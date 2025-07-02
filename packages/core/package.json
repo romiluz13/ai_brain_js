@@ -1,6 +1,6 @@
 {
   "name": "universal-ai-brain",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "🧠 Universal AI Brain 3.0 - The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 $rankFusion hybrid search, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
