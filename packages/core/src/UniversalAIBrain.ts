@@ -334,8 +334,8 @@ export class UniversalAIBrain {
       mode: 'production',
       mongoUri: config?.mongoUri,
       apiKey: config?.apiKey,
-      databaseName: 'ai_brain_mastra',
-      provider: 'voyage' // Mastra works great with Voyage
+      databaseName: 'ai_brain_mastra'
+      // Auto-detect provider from apiKey - no hardcoding
     });
   }
 
@@ -347,8 +347,8 @@ export class UniversalAIBrain {
       mode: 'production',
       mongoUri: config?.mongoUri,
       apiKey: config?.apiKey,
-      databaseName: 'ai_brain_vercel',
-      provider: 'openai' // Vercel AI works great with OpenAI
+      databaseName: 'ai_brain_vercel'
+      // Auto-detect provider from apiKey - no hardcoding
     });
   }
 
@@ -360,8 +360,8 @@ export class UniversalAIBrain {
       mode: 'production',
       mongoUri: config?.mongoUri,
       apiKey: config?.apiKey,
-      databaseName: 'ai_brain_openai',
-      provider: 'openai' // Direct OpenAI integration
+      databaseName: 'ai_brain_openai'
+      // Auto-detect provider from apiKey - no hardcoding
     });
   }
 
@@ -373,8 +373,8 @@ export class UniversalAIBrain {
       mode: 'production',
       mongoUri: config?.mongoUri,
       apiKey: config?.apiKey,
-      databaseName: 'ai_brain_langchain',
-      provider: 'openai' // LangChain works great with OpenAI
+      databaseName: 'ai_brain_langchain'
+      // Auto-detect provider from apiKey - no hardcoding
     });
   }
 
@@ -1160,7 +1160,7 @@ export class UniversalAIBrain {
     await this._episodicMemoryEngine.initialize();
 
     console.log('✅ Phase 3 system initialized successfully');
-    console.log('🎉 ALL 18 COGNITIVE SYSTEMS INTEGRATED SUCCESSFULLY!');
+    console.log('🎉 ALL 24 COGNITIVE SYSTEMS INTEGRATED SUCCESSFULLY!');
   }
 
   private async initializeSafetySystems(): Promise<void> {
