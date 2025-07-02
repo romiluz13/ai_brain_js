@@ -1,15 +1,19 @@
 {
   "name": "universal-ai-brain",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "🧠 Universal AI Brain 3.3 - The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 $rankFusion hybrid search, latest Voyage 3.5 embeddings, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
     "tests/cognitive-systems/**/*",
+    "scripts/setup-wizard.js",
     "README.md",
     "LICENSE"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "universal-ai-brain": "./scripts/setup-wizard.js"
+  },
   "scripts": {
     "build": "echo 'Building Universal AI Brain 3.0...' && tsc -p tsconfig.build.json && echo 'Build complete - TypeScript compiled to JavaScript'",
     "build:ts": "tsc -p tsconfig.build.json",
@@ -21,11 +25,13 @@
     "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
+    "setup": "node scripts/setup-wizard.js",
     "setup:cognitive": "node scripts/setup-cognitive-tests.js",
     "test:cognitive": "cd tests/cognitive-systems && npm run test:all",
     "test:cognitive:memory": "cd tests/cognitive-systems && npm run test:memory",
     "test:cognitive:benchmark": "cd tests/cognitive-systems && npm run benchmark:full",
-    "test:cognitive:setup": "cd tests/cognitive-systems && npm install"
+    "test:cognitive:setup": "cd tests/cognitive-systems && npm install",
+    "postinstall": "echo '\n🧠 Universal AI Brain 3.4 installed successfully!\n✨ Run: npx universal-ai-brain setup\n   to start the interactive setup wizard\n'"
   },
   "keywords": [
     "universal-ai-brain",

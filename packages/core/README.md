@@ -4,11 +4,24 @@
 
 Transform ANY AI framework into a truly intelligent system with semantic memory, emotional intelligence, goal hierarchy, and 21 other cognitive systems.
 
-## 🚀 Quick Start (5 Minutes)
+## 🚀 Quick Start (2 Minutes)
 
 ```bash
+# Install Universal AI Brain
 npm install universal-ai-brain
+
+# Run interactive setup wizard
+npx universal-ai-brain setup
 ```
+
+**The setup wizard will:**
+- ✅ Create a complete project structure
+- ✅ Configure your API keys (Voyage AI or OpenAI)
+- ✅ Set up MongoDB connection
+- ✅ Generate working example code
+- ✅ Create tests and documentation
+
+### Manual Setup
 
 ### Simple Setup with Latest Voyage 3.5 (Recommended)
 ```typescript
