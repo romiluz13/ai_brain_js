@@ -1,6 +1,6 @@
 {
   "name": "universal-ai-brain",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "🧠 Universal AI Brain 3.3 - The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 $rankFusion hybrid search, latest Voyage 3.5 embeddings, and framework-agnostic design supporting Mastra, Vercel AI, LangChain, OpenAI Agents, and more.",
   "files": [
     "dist/**/*",
@@ -11,7 +11,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "echo 'Building Universal AI Brain 3.0 (JavaScript)...' && cp -r src dist && echo 'Build complete - JavaScript files copied'",
+    "build": "echo 'Building Universal AI Brain 3.0...' && tsc -p tsconfig.build.json && echo 'Build complete - TypeScript compiled to JavaScript'",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
     "clean": "rimraf dist",
