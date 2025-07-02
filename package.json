@@ -1,8 +1,8 @@
 {
   "name": "universal-ai-brain",
-  "version": "3.0.0",
+  "version": "3.3.0",
   "private": false,
-  "description": "🧠 UNIVERSAL AI BRAIN 3.0 - The world's most advanced cognitive architecture with 24 specialized systems, MongoDB 8.1 $rankFusion hybrid search, and framework-agnostic design. Works with Mastra, Vercel AI, LangChain, OpenAI Agents, and more!",
+  "description": "🧠 UNIVERSAL AI BRAIN 3.3 - The world's most advanced cognitive architecture with 24 specialized systems, MongoDB 8.1 $rankFusion hybrid search, latest Voyage 3.5 embeddings, and framework-agnostic design. Works with Mastra, Vercel AI, LangChain, OpenAI Agents, and more!",
   "author": "Rom Iluz <rom@iluz.net>",
   "license": "MIT",
   "repository": {
