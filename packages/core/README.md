@@ -1,4 +1,4 @@
-# @mongodb-ai/core
+# universal-ai-brain
 
 **Universal AI Brain - The MongoDB-powered intelligence layer for any TypeScript AI framework.**
 
@@ -7,11 +7,11 @@ Transform ANY TypeScript AI framework into a 90% complete intelligent system wit
 ## 🚀 Quick Start
 
 ```bash
-npm install @mongodb-ai/core
+npm install universal-ai-brain
 ```
 
 ```typescript
-import { UniversalAIBrain, VercelAIAdapter } from '@mongodb-ai/core';
+import { UniversalAIBrain, VercelAIAdapter } from 'universal-ai-brain';
 
 // Initialize the Universal AI Brain
 const brain = new UniversalAIBrain({
