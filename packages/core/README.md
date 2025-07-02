@@ -1,123 +1,201 @@
-# universal-ai-brain
+# 🧠 Universal AI Brain 3.3
 
-**Universal AI Brain - The MongoDB-powered intelligence layer for any TypeScript AI framework.**
+**The world's most comprehensive cognitive architecture for AI agents with 24 cognitive systems, MongoDB 8.1 hybrid search, and latest Voyage 3.5 embeddings.**
 
-Transform ANY TypeScript AI framework into a 90% complete intelligent system with semantic memory, context injection, and cross-conversation learning.
+Transform ANY AI framework into a truly intelligent system with semantic memory, emotional intelligence, goal hierarchy, and 21 other cognitive systems.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (5 Minutes)
 
 ```bash
 npm install universal-ai-brain
 ```
 
+### Simple Setup with Latest Voyage 3.5 (Recommended)
 ```typescript
-import { UniversalAIBrain, VercelAIAdapter } from 'universal-ai-brain';
+import { UniversalAIBrain } from 'universal-ai-brain';
 
-// Initialize the Universal AI Brain
-const brain = new UniversalAIBrain({
-  mongoConfig: {
-    uri: 'your-mongodb-atlas-uri',
-    dbName: 'your-database'
-  },
-  embeddingConfig: {
-    provider: 'openai',
-    apiKey: 'your-openai-key'
-  }
+// 🎯 Latest Voyage 3.5 model (strongest embeddings)
+const brain = UniversalAIBrain.forVoyage({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.VOYAGE_API_KEY,
 });
 
 await brain.initialize();
+console.log('🧠 Universal AI Brain ready with 24 cognitive systems!');
+```
 
-// Choose your framework adapter
-const adapter = new VercelAIAdapter();
-const enhanced = await adapter.integrate(brain);
-
-// Use enhanced framework with 70% more intelligence
-const result = await enhanced.generateText({
-  model: openai('gpt-4'),
-  messages: [{ role: 'user', content: 'Help me with customer support' }]
+### Framework Integration Examples
+```typescript
+// 🎯 Mastra Framework
+const brain = UniversalAIBrain.forMastra({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.VOYAGE_API_KEY
 });
 
-// Result now includes MongoDB-powered context and intelligence!
+// ⚡ Vercel AI SDK
+const brain = UniversalAIBrain.forVercelAI({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// 🦜 LangChain.js
+const brain = UniversalAIBrain.forLangChain({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// 🤖 OpenAI Agents
+const brain = UniversalAIBrain.forOpenAI({
+  mongoUri: process.env.MONGODB_URI,
+  apiKey: process.env.OPENAI_API_KEY
+});
 ```
 
-## 🎯 Supported Frameworks
+## 🧠 The 24 Cognitive Systems
 
-- **Vercel AI SDK** - `VercelAIAdapter`
-- **Mastra** - `MastraAdapter`
-- **OpenAI Agents** - `OpenAIAgentsAdapter`  
-- **LangChain.js** - `LangChainJSAdapter`
+### 🧠 **Core Memory** (4 Systems)
+- **Semantic Memory** - Knowledge storage and retrieval
+- **Working Memory** - Short-term context management
+- **Episodic Memory** - Experience-based learning
+- **Memory Decay** - Intelligent forgetting
 
-## ✨ Features
+### 🎯 **Intelligence** (6 Systems)
+- **Emotional Intelligence** - Emotion recognition and response
+- **Cultural Knowledge** - Cultural awareness and adaptation
+- **Confidence Tracking** - Uncertainty quantification
+- **Self Improvement** - Continuous learning and optimization
+- **Causal Reasoning** - Cause-and-effect understanding
+- **Analogical Mapping** - Pattern recognition across domains
 
-✅ **Semantic Memory** - MongoDB Atlas Vector Search with intelligent context injection  
-✅ **Cross-Conversation Learning** - Agents learn from every interaction  
-✅ **Framework Agnostic** - Works with ANY TypeScript AI framework  
-✅ **Production Ready** - Real error handling, monitoring, and performance optimization  
-✅ **Auto-Detection** - Automatically detects available frameworks  
-✅ **70% Intelligence Boost** - Measurable improvement in response quality  
+### ⚡ **Management** (6 Systems)
+- **Attention Management** - Focus and priority handling
+- **Goal Hierarchy** - Multi-level objective management
+- **Temporal Planning** - Time-aware decision making
+- **Social Intelligence** - Social context understanding
+- **Skill Capability** - Ability assessment and development
+- **Change Stream** - Real-time data monitoring
 
-## 📚 Documentation
+### 🔧 **Advanced Tools** (8 Systems)
+- **Advanced Tool Interface** - External tool integration
+- **Workflow Orchestration** - Complex task coordination
+- **Communication Protocol** - Multi-agent coordination
+- **Multi-Modal Processing** - Multi-format data handling
+- **Human Feedback Integration** - Learning from human input
+- **Notification Manager** - Event-driven notifications
+- **Vector Search** - Semantic similarity matching
+- **Context Injection** - Relevant information retrieval
 
-- [Quick Start Guide](https://github.com/mongodb-ai/universal-brain/blob/main/docs/public/quick-start.md)
-- [Framework Integration Guides](https://github.com/mongodb-ai/universal-brain/tree/main/docs/public/frameworks)
-- [Examples](https://github.com/mongodb-ai/universal-brain/tree/main/examples)
+## 🔥 **MongoDB 8.1 Hybrid Search - World's First $rankFusion**
 
-## 🏗️ Architecture
+✅ **Latest MongoDB 8.1** - Cutting-edge database features
+✅ **$rankFusion Aggregation** - Combines vector + text search
+✅ **Atlas Vector Search** - Semantic similarity at scale
+✅ **Hybrid Search by Default** - Best of both worlds
+✅ **Production Tested** - Real MongoDB Atlas 8.1 cluster
+✅ **Performance Optimized** - Automatic query optimization
 
-The Universal AI Brain provides:
-- **MongoDB Atlas Vector Search** - Semantic memory and context retrieval
-- **Framework Adapters** - Seamless integration with any TypeScript AI framework
-- **Intelligence Engine** - Context injection and prompt enhancement
-- **Learning System** - Continuous improvement from interactions
+## 🎯 **Framework Support**
 
-## 🎯 The Formula
+✅ **Mastra** - `UniversalAIBrain.forMastra()`
+✅ **Vercel AI SDK** - `UniversalAIBrain.forVercelAI()`
+✅ **LangChain.js** - `UniversalAIBrain.forLangChain()`
+✅ **OpenAI Agents** - `UniversalAIBrain.forOpenAI()`
+✅ **Framework Agnostic** - Works with ANY TypeScript AI framework
 
-- **Your Framework (20%)** - Handles basic AI operations
-- **Universal AI Brain (70%)** - Provides MongoDB-powered intelligence
-- **Your Custom Logic (10%)** - Your specific business requirements
+## ⚡ **Latest Features in 3.3**
 
-**= 90% Complete Intelligent System** 🎯
+🆕 **Voyage 3.5 Embeddings** - Latest and strongest embedding model
+🆕 **Smart Provider Selection** - Respects user choice (forOpenAI vs forVoyage)
+🆕 **5-Minute Integration Guide** - Complete setup documentation
+🆕 **Error Classification** - Clear distinction between critical vs non-critical errors
+🆕 **Enhanced Documentation** - Framework-specific examples and troubleshooting
 
-## 🧪 Testing
+## 📖 **Documentation**
 
-Test all 24 cognitive systems with real data:
+📖 **[Complete Integration Guide →](https://github.com/romiluz13/ai_brain_js/blob/main/INTEGRATION_GUIDE.md)**
+🎯 **[Framework Examples →](https://github.com/romiluz13/ai_brain_js/tree/main/examples/)**
+📚 **[Full Documentation →](https://github.com/romiluz13/ai_brain_js#readme)**
+
+## 🏗️ **Architecture**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Your AI Framework                        │
+│              (Mastra, Vercel AI, LangChain, etc.)          │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│                Universal AI Brain 3.3                      │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│  │   Memory    │ │Intelligence │ │    MongoDB 8.1          │ │
+│  │  Systems    │ │  Systems    │ │   Hybrid Search         │ │
+│  │    (4)      │ │    (14)     │ │   $rankFusion           │ │
+│  └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│                MongoDB Atlas 8.1                           │
+│        Vector Search + Text Search + $rankFusion           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🧪 **Testing All 24 Cognitive Systems**
 
 ```bash
-# One-command setup
-npm run setup:cognitive
+# Test all cognitive systems with real MongoDB data
+npm test
 
-# Test all cognitive systems
-npm run test:cognitive
-
-# Test memory systems
+# Test specific cognitive systems
 npm run test:cognitive:memory
-
-# Full benchmark
 npm run test:cognitive:benchmark
+
+# Setup cognitive system tests
+npm run setup:cognitive
 ```
 
-## 📦 Requirements
+## 📦 **Requirements**
 
-- Node.js 18+
-- MongoDB Atlas (for vector search)
-- OpenAI API key (for embeddings)
-- One of the supported AI frameworks
+- **Node.js 18+** - Modern JavaScript runtime
+- **MongoDB Atlas** - For vector search and hybrid search
+- **API Keys** - Voyage AI (recommended) or OpenAI
+- **TypeScript** - For best development experience
 
-## 🤝 Contributing
+## 🚨 **Error Handling Guide**
 
-We welcome contributions! See our [Contributing Guide](https://github.com/mongodb-ai/universal-brain/blob/main/CONTRIBUTING.md).
+### ✅ **Safe to Ignore (Non-Critical)**
+```
+⚠️ NON-CRITICAL: can't $divide by zero
+⚠️ NON-CRITICAL: Atlas Vector Search failed
+⚠️ NON-CRITICAL: Dashboard refresh failed
+```
 
-## 📄 License
+### ❌ **Requires Attention (Critical)**
+```
+❌ CRITICAL: MongoDB connection failed
+❌ CRITICAL: API key invalid
+❌ CRITICAL: Brain initialization failed
+```
 
-MIT License - see [LICENSE](https://github.com/mongodb-ai/universal-brain/blob/main/LICENSE) file for details.
+## 🔐 **Environment Setup**
 
-## 🔗 Links
+```bash
+# Required Environment Variables
+MONGODB_URI=mongodb+srv://your-connection-string
+VOYAGE_API_KEY=pa-your-voyage-api-key
+OPENAI_API_KEY=sk-your-openai-key  # Optional fallback
+```
 
-- [GitHub Repository](https://github.com/mongodb-ai/universal-brain)
-- [Documentation](https://github.com/mongodb-ai/universal-brain/tree/main/docs/public)
-- [Examples](https://github.com/mongodb-ai/universal-brain/tree/main/examples)
-- [Issues](https://github.com/mongodb-ai/universal-brain/issues)
+## 📄 **License**
+
+MIT License - see [LICENSE](https://github.com/romiluz13/ai_brain_js/blob/main/LICENSE) file for details.
+
+## 🔗 **Links**
+
+- **[GitHub Repository](https://github.com/romiluz13/ai_brain_js)** - Source code and issues
+- **[Integration Guide](https://github.com/romiluz13/ai_brain_js/blob/main/INTEGRATION_GUIDE.md)** - Complete setup guide
+- **[Examples](https://github.com/romiluz13/ai_brain_js/tree/main/examples/)** - Framework examples
+- **[npm Package](https://www.npmjs.com/package/universal-ai-brain)** - Install via npm
 
 ---
 
-**Transform ANY TypeScript AI framework into a 90% complete intelligent system.** 🧠⚡
+**🧠 Universal AI Brain 3.3 - Making AI agents truly intelligent with 24 cognitive systems.** ⚡
